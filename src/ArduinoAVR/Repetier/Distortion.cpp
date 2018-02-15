@@ -25,6 +25,12 @@
 
 #if DISTORTION_CORRECTION
 
+#if (DRIVE_SYSTEM == DELTA)
+	#if (DISTORTION_EXTRAPOLATE_CORNERS != 0) && (DISTORTION_EXTRAPOLATE_CORNERS != 1) && (DISTORTION_EXTRAPOLATE_CORNERS != 2)
+		#error DISTORTION_EXTRAPOLATE_CORNERS is - 0 For extrpolate only corner - 1 For extrpolate only corner - 2 Extrapolate all poits to externare cicle.
+	#endif
+#endif
+
 Distortion Printer::distortion;
 
 void Printer::measureDistortion(void) {
@@ -90,6 +96,13 @@ void Distortion::updateDerived() {
 #if DRIVE_SYSTEM == DELTA
     step = (2 * Printer::axisStepsPerMM[Z_AXIS] * DISTORTION_CORRECTION_R) / (DISTORTION_CORRECTION_POINTS - 1.0f);
     radiusCorrectionSteps = DISTORTION_CORRECTION_R * Printer::axisStepsPerMM[Z_AXIS];
+
+	#if DISTORTION_EXTRAPOLATE_CORNERS == 2
+	iradius = ( DISTORTION_CORRECTION_POINTS - 1 ) / 2;
+	cix = DISTORTION_CORRECTION_POINTS - 1 - iradius;
+	ciy = DISTORTION_CORRECTION_POINTS - 1 - iradius;
+	iradius = ( iradius * iradius ) + 0,1;
+	#endif
 #else
     xCorrectionSteps = (DISTORTION_XMAX - DISTORTION_XMIN) * Printer::axisStepsPerMM[X_AXIS] / (DISTORTION_CORRECTION_POINTS - 1);
     xOffsetSteps = DISTORTION_XMIN * Printer::axisStepsPerMM[X_AXIS];
@@ -130,7 +143,8 @@ void Distortion::reportStatus() {
 void Distortion::resetCorrection(void) {
     Com::printInfoFLN(PSTR("Resetting Z correction"));
     for(int i = 0; i < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS; i++)
-        setMatrix(0, i);
+		setMatrix(DISTORTION_LIMIT_TO, i);
+        // setMatrix(0, i);
 }
 
 int Distortion::matrixIndex(fast8_t x, fast8_t y) const {
@@ -157,6 +171,17 @@ void Distortion::setMatrix(int32_t val, int index) {
 bool Distortion::isCorner(fast8_t i, fast8_t j) const {
     return (i == 0 || i == DISTORTION_CORRECTION_POINTS - 1)
            && (j == 0 || j == DISTORTION_CORRECTION_POINTS - 1);
+}
+
+bool Distortion::isExternalRadiusPoint(fast8_t ix, fast8_t iy) const {
+	return ((ix-cix)*(ix-cix) + (iy-ciy)*(iy-ciy)) > iradius ) );
+	/*
+	bool r = false;
+	if ( ((ix-cix)*(ix-cix) + (iy-ciy)*(iy-ciy)) > iradius ) ) {
+		r = true;
+	}
+	return r;
+	*/
 }
 
 /**
@@ -210,10 +235,14 @@ bool Distortion::measure(void) {
 
     Printer::startProbing(true);
     Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, z, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+  
     for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0; iy--)
         for (ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++) {
-#if (DRIVE_SYSTEM == DELTA) && DISTORTION_EXTRAPOLATE_CORNERS
+#if (DRIVE_SYSTEM == DELTA) && (DISTORTION_EXTRAPOLATE_CORNERS == 1)
             if (isCorner(ix, iy)) continue;
+#endif
+#if (DRIVE_SYSTEM == DELTA) && (DISTORTION_EXTRAPOLATE_CORNERS == 2)
+			if (isExternalRadiusPoint(ix, iy)) continue;
 #endif
 #if DRIVE_SYSTEM == DELTA
             float mtx = Printer::invAxisStepsPerMM[X_AXIS] * (ix * step - radiusCorrectionSteps);
