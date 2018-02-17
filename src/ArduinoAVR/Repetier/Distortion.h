@@ -66,8 +66,10 @@ private:
     INLINE int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2, fast8_t y2) const;
     void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
     void extrapolateCorners();
-    bool isExternalRadiusPoint(fast8_t ix, fast8_t iy) const;
 
+	bool isExternalRadiusPoint(fast8_t ix, fast8_t iy) const;
+    void resetCorrectionTo(int32_t z);
+	
     // attributes
 #if DRIVE_SYSTEM == DELTA
     int32_t step;

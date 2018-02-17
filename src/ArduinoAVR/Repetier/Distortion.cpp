@@ -82,7 +82,12 @@ Distortion::Distortion() {
 void Distortion::init() {
     updateDerived();
 #if !DISTORTION_PERMANENT
+    #if DISTORTION_EXTRAPOLATE_CORNERS == 1
     resetCorrection();
+	#endif
+	#if DISTORTION_EXTRAPOLATE_CORNERS == 2
+	resetCorrectionTo(DISTORTION_LIMIT_TO);
+	#endif
 #endif
 #if EEPROM_MODE != 0
     enabled = EEPROM::isZCorrectionEnabled();
@@ -98,10 +103,14 @@ void Distortion::updateDerived() {
     radiusCorrectionSteps = DISTORTION_CORRECTION_R * Printer::axisStepsPerMM[Z_AXIS];
 
 	#if DISTORTION_EXTRAPOLATE_CORNERS == 2
-	iradius = ( DISTORTION_CORRECTION_POINTS - 1 ) / 2;
-	cix = DISTORTION_CORRECTION_POINTS - 1 - iradius;
-	ciy = DISTORTION_CORRECTION_POINTS - 1 - iradius;
-	iradius = ( iradius * iradius ) + 0,1;
+	iradius = ( ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2) + 0.1;
+	Com::printF(PSTR("updateDerived iradius : "), iradius);
+	cix = ( ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2);
+	ciy = ( ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2);
+	iradius = iradius * iradius;
+	Com::printF(PSTR(" - cix : "), cix, 3);
+	Com::printF(PSTR(" - ciy : "), ciy, 3);
+	Com::printFLN(PSTR(" - iradius : "), iradius, 3);
 	#endif
 #else
     xCorrectionSteps = (DISTORTION_XMAX - DISTORTION_XMIN) * Printer::axisStepsPerMM[X_AXIS] / (DISTORTION_CORRECTION_POINTS - 1);
@@ -143,8 +152,13 @@ void Distortion::reportStatus() {
 void Distortion::resetCorrection(void) {
     Com::printInfoFLN(PSTR("Resetting Z correction"));
     for(int i = 0; i < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS; i++)
-		setMatrix(DISTORTION_LIMIT_TO, i);
-        // setMatrix(0, i);
+        setMatrix(0, i);
+}
+
+void Distortion::resetCorrectionTo(int32_t z) {
+    Com::printInfoFLN(PSTR("Resetting Z correction to."));
+    for(int i = 0; i < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS; i++)
+		setMatrix( z * Printer::axisStepsPerMM[Z_AXIS], i);
 }
 
 int Distortion::matrixIndex(fast8_t x, fast8_t y) const {
@@ -174,14 +188,22 @@ bool Distortion::isCorner(fast8_t i, fast8_t j) const {
 }
 
 bool Distortion::isExternalRadiusPoint(fast8_t ix, fast8_t iy) const {
-	return ((ix-cix)*(ix-cix) + (iy-ciy)*(iy-ciy)) > iradius ) );
-	/*
+	// return ( ((ix-cix)*(ix-cix) + (iy-ciy)*(iy-ciy)) > iradius );
+	
 	bool r = false;
-	if ( ((ix-cix)*(ix-cix) + (iy-ciy)*(iy-ciy)) > iradius ) ) {
+	
+	float d = ((ix-cix)*(ix-cix) + (iy-ciy)*(iy-ciy));
+	Com::printF(PSTR("isExternalRadiusPoint - ix :"), (int)ix);
+	Com::printF(PSTR(" - iy : "), (int)iy);
+	Com::printF(PSTR(" - d : "), d, 3);
+	Com::printF(PSTR(" - iradius : "), iradius, 3);
+	if ( d > iradius ) {
 		r = true;
-	}
+	    Com::printFLN(PSTR(" - "), "OUT");
+	} else {
+		Com::printFLN(PSTR(" - "), "IN");
+	}		
 	return r;
-	*/
 }
 
 /**
@@ -270,7 +292,7 @@ bool Distortion::measure(void) {
                       matrixIndex(ix, iy));
         }
     Printer::finishProbing();
-#if (DRIVE_SYSTEM == DELTA) && DISTORTION_EXTRAPOLATE_CORNERS
+#if (DRIVE_SYSTEM == DELTA) && (DISTORTION_EXTRAPOLATE_CORNERS == 1)
     extrapolateCorners();
 #endif
     // make average center
@@ -285,6 +307,9 @@ bool Distortion::measure(void) {
         setMatrix(getMatrix(k) - sum, k);
     Printer::zLength -= sum * Printer::invAxisStepsPerMM[Z_AXIS];
     */
+#if (DRIVE_SYSTEM == DELTA) && (DISTORTION_EXTRAPOLATE_CORNERS == 2)
+	// New extrapolateCorners
+#endif
 #if EEPROM_MODE
     EEPROM::storeDataIntoEEPROM();
 #endif
