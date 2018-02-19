@@ -58,6 +58,7 @@ public:
     void set(float x, float y, float z);
     void showMatrix();
     void resetCorrection();
+	void extrapolateCornersCircular(); // For Test
 private:
     int matrixIndex(fast8_t x, fast8_t y) const;
     int32_t getMatrix(int index) const;
@@ -69,6 +70,8 @@ private:
 
 	bool isExternalRadiusPoint(fast8_t ix, fast8_t iy) const;
     void resetCorrectionTo(int32_t z);
+	void extrapolateCornersTo(fast8_t ix, fast8_t iy);
+	// void extrapolateCornersCircular();
 	
     // attributes
 #if DRIVE_SYSTEM == DELTA

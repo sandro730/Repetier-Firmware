@@ -103,10 +103,10 @@ void Distortion::updateDerived() {
     radiusCorrectionSteps = DISTORTION_CORRECTION_R * Printer::axisStepsPerMM[Z_AXIS];
 
 	#if DISTORTION_EXTRAPOLATE_CORNERS == 2
-	iradius = ( ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2) + 0.1;
+	iradius = ( ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2 ) + 0.1;
 	Com::printF(PSTR("updateDerived iradius : "), iradius);
-	cix = ( ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2);
-	ciy = ( ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2);
+	cix = ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2;
+	ciy = ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2;
 	iradius = iradius * iradius;
 	Com::printF(PSTR(" - cix : "), cix, 3);
 	Com::printF(PSTR(" - ciy : "), ciy, 3);
@@ -191,7 +191,6 @@ bool Distortion::isExternalRadiusPoint(fast8_t ix, fast8_t iy) const {
 	// return ( ((ix-cix)*(ix-cix) + (iy-ciy)*(iy-ciy)) > iradius );
 	
 	bool r = false;
-	
 	float d = ((ix-cix)*(ix-cix) + (iy-ciy)*(iy-ciy));
 	Com::printF(PSTR("isExternalRadiusPoint - ix :"), (int)ix);
 	Com::printF(PSTR(" - iy : "), (int)iy);
@@ -224,6 +223,41 @@ void Distortion::extrapolateCorners() {
     extrapolateCorner(0, m, 1, -1);
     extrapolateCorner(m, 0, -1, 1);
     extrapolateCorner(m, m, -1, -1);
+}
+
+void Distortion::extrapolateCornersTo(fast8_t ix, fast8_t iy) {
+	fast8_t icx, icy;
+	icx = floor(cix)-(ix-floor(cix));
+	icy = floor(ciy)-(iy-floor(ciy));
+	Com::printF(PSTR(" extrapolateCornersTo -  ix : "), ix, 3);
+	Com::printF(PSTR(" -  iy : "), iy, 3);
+	Com::printF(PSTR(" - icx : "), icx, 3);
+	Com::printF(PSTR(" - icy : "), icy, 3);
+    extrapolateCorner(ix,  iy,  -1, -1);
+    extrapolateCorner(ix,  icy, -1,  1);
+    extrapolateCorner(icx, iy,   1, -1);
+    extrapolateCorner(icx, icy,  1,  1);
+	Com::printFLN(PSTR(""), "");
+}
+
+void Distortion::extrapolateCornersCircular(void) {
+	fast8_t ix, iy;
+	bool end = true;
+	while ( end ) {
+		end = false;
+		for(iy=ceil(ciy); iy < DISTORTION_CORRECTION_POINTS; iy++) {
+			for(ix=ceil(cix); ix < DISTORTION_CORRECTION_POINTS; ix++) {
+				Com::printF(PSTR(" extrapolateCornersCircular - ix : "), ix, 3);
+				Com::printFLN(PSTR(" - iy : "), iy, 3);
+				if ( getMatrix(matrixIndex(ix, iy)) == DISTORTION_LIMIT_TO ) {
+					Com::printFLN(PSTR(" - extrapolateCornersTo Exec"), "");
+					extrapolateCornersTo(ix, iy);
+					end = true;
+					break;
+				}
+			}
+		}
+	}
 }
 
 bool Distortion::measure(void) {
@@ -308,7 +342,7 @@ bool Distortion::measure(void) {
     Printer::zLength -= sum * Printer::invAxisStepsPerMM[Z_AXIS];
     */
 #if (DRIVE_SYSTEM == DELTA) && (DISTORTION_EXTRAPOLATE_CORNERS == 2)
-	// New extrapolateCorners
+	extrapolateCornersCircular();
 #endif
 #if EEPROM_MODE
     EEPROM::storeDataIntoEEPROM();

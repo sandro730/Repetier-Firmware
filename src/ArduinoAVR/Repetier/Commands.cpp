@@ -1287,7 +1287,9 @@ void Commands::processGCode(GCode *com) {
             } else {
                 Com::printErrorFLN(PSTR("You need to define X, Y and Z to set a point!"));
             }
-        } else { // G33
+        } else if (com->hasD()) { // D=Debug Test function extrapolateCornersCircular G33 D
+			Printer::distortion.extrapolateCornersCircular();
+		} else { // G33
             Printer::measureDistortion();
         }
     }
