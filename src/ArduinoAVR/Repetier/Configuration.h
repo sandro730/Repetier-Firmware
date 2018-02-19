@@ -93,6 +93,10 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Zonestar ZRIB 2.1          = 39
 // User layout defined in userpins.h = 999
 
+// Configuration.h for my printer 3D.
+// Modify only file Configuration.h for to branch MyMaster
+// To maintain a configuration that is aligned with repetier/Repetier-Firmware
+
 #define MOTHERBOARD 33
 
 #include "pins.h"
