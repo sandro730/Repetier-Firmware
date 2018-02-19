@@ -1,4 +1,4 @@
-# Sandro730 19/02/2018
+# Sandro730 - 19/02/2018
 
 Modify only file Configuration.h for to branch MyMaster.
 
