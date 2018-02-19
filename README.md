@@ -1,3 +1,9 @@
+# Sandro730 19/02/2018
+
+Modify only file Configuration.h for to branch MyMaster.
+
+To maintain a configuration that is aligned with repetier/Repetier-Firmware.
+
 # Repetier-Firmware - the fast and user friendly firmware
 
 ## Notes for developers/pull requests
