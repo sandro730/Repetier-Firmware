@@ -1800,8 +1800,8 @@ best bonding with surface. */
 #define DISTORTION_END_HEIGHT 1.5
 /** If your corners measurement points are not measurable with given radius, you can
 set this to 1. It then omits the outer measurement points allowing a larger correction area.*/
-// #define DISTORTION_EXTRAPOLATE_CORNERS 0
-// It then set to 2 the outer measurement points to external radius.
+// SB // #define DISTORTION_EXTRAPOLATE_CORNERS 0
+// SB // It then set to 2 the outer measurement points to external radius.
 #define DISTORTION_EXTRAPOLATE_CORNERS 2
 
 /* If your printer is not exactly square but is more like a parallelogram, you can
