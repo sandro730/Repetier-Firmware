@@ -242,7 +242,10 @@ void Distortion::extrapolateCornersTo(fast8_t ix, fast8_t iy) {
 
 void Distortion::extrapolateCornersCircular(void) {
 	fast8_t ix, iy;
-	bool end = true;
+	bool end;
+	long startTime, endTime;
+	startTime = millis();
+	end = true;
 	while ( end ) {
 		end = false;
 		for(iy=ceil(ciy); iy < DISTORTION_CORRECTION_POINTS; iy++) {
@@ -258,6 +261,10 @@ void Distortion::extrapolateCornersCircular(void) {
 			}
 		}
 	}
+	endTime = millis(); 
+	Com::printF(PSTR("extrapolateCornersCircular - Star Time : "), startTime, 3);
+	Com::printF(PSTR(" - End Time : "), endTime, 3);
+	Com::printFLN(PSTR(" - Time : "), (endTime-startTime), 3);
 }
 
 bool Distortion::measure(void) {
