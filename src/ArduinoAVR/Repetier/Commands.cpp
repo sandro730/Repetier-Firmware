@@ -1241,7 +1241,7 @@ void Commands::processGCode(GCode *com) {
                 float h = Printer::convertToMM(com->hasH() ? com->H : 0);
                 float o = Printer::convertToMM(com->hasR() ? com->R : h);
 #if DISTORTION_CORRECTION
-				// Undo z distortion correction contained in z
+                // Undo z distortion correction contained in z
                 float zCorr = 0;
                 if(Printer::distortion.isEnabled()) {
                     zCorr = Printer::distortion.correct(Printer::currentPositionSteps[X_AXIS], Printer::currentPositionSteps[Y_AXIS], Printer::zMinSteps) * Printer::invAxisStepsPerMM[Z_AXIS];
@@ -1278,7 +1278,14 @@ void Commands::processGCode(GCode *com) {
 #if DISTORTION_CORRECTION
     case 33: {
         if(com->hasL()) { // G33 L0 - List distortion matrix
-            Printer::distortion.showMatrix();
+            switch(static_cast<int>(com->L)) {
+                case 0:
+                    Printer::distortion.showMatrix();
+                break;
+                case 1: // G33 L1 - List distortion matrix format csv
+                    Printer::distortion.printMatrixCsv();
+                break;
+            }
         } else if(com->hasR()) { // G33 R0 - Reset distortion matrix
             Printer::distortion.resetCorrection();
         } else if(com->hasX() || com->hasY() || com->hasZ()) { // G33 X<xpos> Y<ypos> Z<zCorrection> - Set correction for nearest point
@@ -1288,8 +1295,8 @@ void Commands::processGCode(GCode *com) {
                 Com::printErrorFLN(PSTR("You need to define X, Y and Z to set a point!"));
             }
         } else if (com->hasD()) { // D=Debug Test function extrapolateCornersCircular G33 D
-			Printer::distortion.extrapolateCornersCircular();
-		} else { // G33
+            Printer::distortion.extrapolateCornersCircular();
+        } else { // G33
             Printer::measureDistortion();
         }
     }
@@ -1317,11 +1324,11 @@ void Commands::processGCode(GCode *com) {
         if(com->hasE()) {
             Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = Printer::convertToMM(com->E) * Printer::axisStepsPerMM[E_AXIS];
         }
-		if(com->hasX() || com->hasY() || com->hasZ()) {
-			Com::printF(PSTR("X_OFFSET:"), Printer::coordinateOffset[X_AXIS], 3);
-			Com::printF(PSTR(" Y_OFFSET:"), Printer::coordinateOffset[Y_AXIS], 3);
-			Com::printFLN(PSTR(" Z_OFFSET:"), Printer::coordinateOffset[Z_AXIS], 3);
-		}
+        if(com->hasX() || com->hasY() || com->hasZ()) {
+            Com::printF(PSTR("X_OFFSET:"), Printer::coordinateOffset[X_AXIS], 3);
+            Com::printF(PSTR(" Y_OFFSET:"), Printer::coordinateOffset[Y_AXIS], 3);
+            Com::printFLN(PSTR(" Z_OFFSET:"), Printer::coordinateOffset[Z_AXIS], 3);
+        }
     }
     break;
 #if DRIVE_SYSTEM == DELTA
@@ -1771,34 +1778,34 @@ void Commands::processMCode(GCode *com) {
     case 83: // M83
         Printer::relativeExtruderCoordinateMode = true;
         break;
-	case 18: // M18 is to disable named axis
+    case 18: // M18 is to disable named axis
         {
-			Commands::waitUntilEndOfAllMoves();
-			bool named = false;
-			if(com->hasX()) {
-				named = true;
-				Printer::disableXStepper();
-			}
-			if(com->hasY()) {
-				named = true;
-				Printer::disableYStepper();
-			}
-			if(com->hasZ()) {
-				named = true;
-				Printer::disableZStepper();
-			}
-			if(com->hasE()) {
-				named = true;
-				Extruder::disableCurrentExtruderMotor();
-			}
-			if(!named) {
-				Printer::disableXStepper();
-				Printer::disableYStepper();
-				Printer::disableZStepper();
-				Extruder::disableAllExtruderMotors();
-			}
-		}
-		break;
+            Commands::waitUntilEndOfAllMoves();
+            bool named = false;
+            if(com->hasX()) {
+                named = true;
+                Printer::disableXStepper();
+            }
+            if(com->hasY()) {
+                named = true;
+                Printer::disableYStepper();
+            }
+            if(com->hasZ()) {
+                named = true;
+                Printer::disableZStepper();
+            }
+            if(com->hasE()) {
+                named = true;
+                Extruder::disableCurrentExtruderMotor();
+            }
+            if(!named) {
+                Printer::disableXStepper();
+                Printer::disableYStepper();
+                Printer::disableZStepper();
+                Extruder::disableAllExtruderMotors();
+            }
+        }
+        break;
     case 84: // M84
         if(com->hasS()) {
             stepperInactiveTime = com->S * 1000;
@@ -2396,7 +2403,7 @@ void Commands::processMCode(GCode *com) {
 #if FEATURE_SERVO
     case 340: // M340
         if(com->hasP() && com->P < 4 && com->P >= 0) {
-			ENSURE_POWER
+            ENSURE_POWER
             int s = 0;
             if(com->hasS())
                 s = com->S;
@@ -2719,9 +2726,9 @@ void Commands::processMCode(GCode *com) {
     }
     break;
 #endif
-	case 998:
-		UI_MESSAGE(com->S);
-		break;
+    case 998:
+        UI_MESSAGE(com->S);
+        break;
     case 999: // Stop fatal error take down
         if(com->hasS())
             GCode::fatalError(PSTR("Testing fatal error"));
