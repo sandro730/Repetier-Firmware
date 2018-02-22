@@ -333,6 +333,10 @@ bool Distortion::measure(void) {
                       matrixIndex(ix, iy));
         }
     Printer::finishProbing();
+	
+	// Print Matric csv format before to extrapolate out pointer.
+	printMatrixCsv();
+	
 #if (DRIVE_SYSTEM == DELTA) && (DISTORTION_EXTRAPOLATE_CORNERS == 1)
     extrapolateCorners();
 #endif
@@ -354,13 +358,17 @@ bool Distortion::measure(void) {
 #if EEPROM_MODE
     EEPROM::storeDataIntoEEPROM();
 #endif
-// print matrix
+    // print matrix
+	printMatrixCsv();
+	/*
     Com::printInfoFLN(PSTR("Distortion correction matrix:"));
     for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0 ; iy--) {
         for(ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++)
             Com::printF(ix ? PSTR(", ") : PSTR(""), getMatrix(matrixIndex(ix, iy)));
         Com::println();
     }
+	*/
+	
     showMatrix();
     enable(true);
     return true;
@@ -538,7 +546,7 @@ void Distortion::printMatrixCsv( void ) {
     Com::printInfoFLN(PSTR("Distortion correction matrix:"));
     for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0 ; iy--) {
         for(ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++)
-            Com::printF(ix ? PSTR(";") : PSTR(""), getMatrix(matrixIndex(ix, iy)));
+            Com::printF(ix ? PSTR(", ") : PSTR(""), getMatrix(matrixIndex(ix, iy)));
         Com::println();
     }
 }
