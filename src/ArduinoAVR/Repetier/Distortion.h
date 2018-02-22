@@ -58,8 +58,8 @@ public:
     void set(float x, float y, float z);
     void showMatrix();
     void resetCorrection();
-    void extrapolateCornersCircular(); // For Test
-    void printMatrixCsv( void );       // For Test
+    void extrapolateCornersCircular(); // For Test G33 D
+    void printMatrixCsv( void );       // For Test G33 L1
 private:
     int matrixIndex(fast8_t x, fast8_t y) const;
     int32_t getMatrix(int index) const;
