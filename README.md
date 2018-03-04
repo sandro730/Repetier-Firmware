@@ -5,6 +5,7 @@
 | :--- | :---                                                              | :---      | :---       |
 | 1    | First test to execute for the function isExternalRadiusPoint      | Result OK | 17/02/2018 |
 | 2    | First test to execute for the function extrapolateCornersCircular | Result OK | 04/03/2018 |
+| 3    | Last test is ok. Create a documentation.                          | Result OK | ../03/2018 |
 
 # Repetier-Firmware - the fast and user friendly firmware
 
