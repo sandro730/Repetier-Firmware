@@ -59,7 +59,8 @@ public:
     void showMatrix();
     void resetCorrection();
     void extrapolateCornersCircular(); // For Test G33 D
-    void printMatrixCsv( void );       // For Test G33 L1
+    void printMatrixCsv( bool raw );   // For Test G33 L1 mm value - Test G33 L2 Raw Value
+	void resetCorrectionTo(int32_t z); // For Test
 private:
     int matrixIndex(fast8_t x, fast8_t y) const;
     int32_t getMatrix(int index) const;
@@ -70,7 +71,7 @@ private:
     void extrapolateCorners();
 
     bool isExternalRadiusPoint(fast8_t ix, fast8_t iy) const;
-    void resetCorrectionTo(int32_t z);
+    // void resetCorrectionTo(int32_t z);
     void extrapolateCornersTo(fast8_t ix, fast8_t iy);
     // void extrapolateCornersCircular();
 

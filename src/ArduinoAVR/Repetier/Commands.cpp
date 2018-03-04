@@ -1282,12 +1282,22 @@ void Commands::processGCode(GCode *com) {
                 case 0:
                     Printer::distortion.showMatrix();
                 break;
-                case 1: // G33 L1 - List distortion matrix format csv
-                    Printer::distortion.printMatrixCsv();
+                case 1: // G33 L1 - List distortion matrix format csv mm
+                    Printer::distortion.printMatrixCsv( false );
+                break;
+				case 2: // G33 L2 - List distortion matrix format csv raw
+                    Printer::distortion.printMatrixCsv( true );
                 break;
             }
-        } else if(com->hasR()) { // G33 R0 - Reset distortion matrix
-            Printer::distortion.resetCorrection();
+        } else if(com->hasR()) { // G33 R0 - Reset distortion matrix - G33 R1 - Reset distortion to matrix
+			switch(static_cast<int>(com->R)) {
+                case 0:
+					Printer::distortion.resetCorrection();
+				break;
+                case 1:
+					Printer::distortion.resetCorrectionTo(DISTORTION_LIMIT_TO);
+				break;
+            }
         } else if(com->hasX() || com->hasY() || com->hasZ()) { // G33 X<xpos> Y<ypos> Z<zCorrection> - Set correction for nearest point
             if(com->hasX() && com->hasY() && com->hasZ()) {
                 Printer::distortion.set(com->X, com->Y, com->Z);
