@@ -278,6 +278,7 @@ void Distortion::extrapolateCornersCircular(void) {
             }
         }
     }
+
     endTime = millis(); 
     Com::printF(PSTR("extrapolateCornersCircular - Star Time : "), startTime, 3);
     Com::printF(PSTR(" - End Time : "), endTime, 3);
