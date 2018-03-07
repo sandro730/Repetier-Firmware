@@ -32,25 +32,20 @@ If set to 2, the points outside the radius of the circle are excluded.
 
 Distortion.h Distortion.cpp
 
- - bool Distortion :: isExternalRadiusPoint (fast8_t ix, fast8_t iy) const
- 
- To calculate the distance of the pinto from the established center.
+ - bool Distortion::isExternalRadiusPoint(fast8_t ix, fast8_t iy) const
+   - To calculate the distance of the pinto from the established center.
 
- - void Distortion :: extrapolateCorners (fast8_t ix, fast8_t iy)
+ - void Distortion::extrapolateCorners(fast8_t ix, fast8_t iy)
+   - Edit function by adding the ix, iy arguments to recalculate the value.
 
-Edit function by adding the ix, iy arguments to recalculate the value.
+ - void Distortion::extrapolateCornersCircular(void)
+   - To calculate the values to be assigned to points outside the radius of the circle.
 
- - void Distortion :: extrapolateCornersCircular (void)
+ - void Distortion::printMatrixCsv(bool raw)
+   - To print the matrix in CSV format.
+   - raw = true - List of raw values of the distortion matrix.
+   - raw = false - List of values in mm of the distortion matrix.
 
-To calculate the values to be assigned to points outside the radius of the circle.
-
- - void Distortion :: printMatrixCsv (bool raw)
-
-To print the matrix in CSV format.
-
-raw = true - List of raw values of the distortion matrix.
-
-raw = false - List of values in mm of the distortion matrix.
 
 
 # Repetier-Firmware - the fast and user friendly firmware
