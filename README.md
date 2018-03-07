@@ -7,41 +7,50 @@
 | 2    | First test to execute for the function extrapolateCornersCircular | Result OK | 04/03/2018 |
 | 3    | Last test is ok. Create a documentation.                          | Result OK | ../03/2018 |
 
-Added GCode commands
-G33 L0 - Distortion matrix list
-G33 L1 - Csv mm format distortion matrix list
-G33 L2 - Raw csv distortion matrix format list
+## Added GCode commands
 
-Formula to calculate points outside the circle.
+ - G33 L0 - Distortion matrix list
+ - G33 L1 - Csv mm format distortion matrix list
+ - G33 L2 - Raw csv distortion matrix format list
 
-Distance between two points = sqrt ((Xp - Xc) ^ 2 + (Yp - Yc) ^ 2)
+## Formula to calculate points outside the circle.
+
+ - Distance between two points = sqrt ((Xp - Xc) ^ 2 + (Yp - Yc) ^ 2)
+
 Xc Yc - Coordinates of the position of the center of the circle.
+
 Xp Yp - Coordinates of the point to be checked.
 
-Add to the Configuration.h file
+## Add to the Configuration.h file
 
 If the angle measurement points can not be measured with a given radius, you can set them to 1.
 Then it omits the external measurement points allowing for a larger correction area.
 If set to 2, the points outside the radius of the circle are excluded.
 #define DISTORTION_EXTRAPOLATE_CORNERS 0 - 1 - 2
 
-Function added to the files
+## Function added to the files
 
 Distortion.h Distortion.cpp
 
-bool Distortion :: isExternalRadiusPoint (fast8_t ix, fast8_t iy) const
-To calculate the distance of the pinto from the established center.
+ - bool Distortion :: isExternalRadiusPoint (fast8_t ix, fast8_t iy) const
+ 
+ To calculate the distance of the pinto from the established center.
 
-void Distortion :: extrapolateCorners (fast8_t ix, fast8_t iy)
+ - void Distortion :: extrapolateCorners (fast8_t ix, fast8_t iy)
+
 Edit function by adding the ix, iy arguments to recalculate the value.
 
-void Distortion :: extrapolateCornersCircular (void)
-To calculate the values ​​to be assigned to points outside the radius of the circle.
+ - void Distortion :: extrapolateCornersCircular (void)
 
-void Distortion :: printMatrixCsv (bool raw)
+To calculate the values to be assigned to points outside the radius of the circle.
+
+ - void Distortion :: printMatrixCsv (bool raw)
+
 To print the matrix in CSV format.
-raw = true - List of raw values ​​of the distortion matrix.
-raw = false - List of values ​​in mm of the distortion matrix.
+
+raw = true - List of raw values of the distortion matrix.
+
+raw = false - List of values in mm of the distortion matrix.
 
 
 # Repetier-Firmware - the fast and user friendly firmware
