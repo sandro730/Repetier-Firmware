@@ -68,7 +68,6 @@ private:
     void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
     void extrapolateCorners(fast8_t ix, fast8_t iy);
     bool isExternalRadiusPoint(fast8_t ix, fast8_t iy) const;
-    void extrapolateCornersTo(fast8_t ix, fast8_t iy);
     void extrapolateCornersCircular();
 	
     // attributes
