@@ -23,4 +23,14 @@ src/Repetier-Atmel7/*
 src/ArduinoDUE/Repetier.zip
 src/ArduinoAVR/Repetier.zip
 workspace.xml
+<<<<<<< HEAD
 /.project
+=======
+.idea
+settings.json
+src/ArduinoDUE/.vscode
+src/ArduinoAVR/.vscode
+src/SampleEventSystems/Stacker IDEX
+activateFelix.sh
+activateOriginal.sh
+>>>>>>> refs/remotes/origin/master
