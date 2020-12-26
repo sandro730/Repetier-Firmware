@@ -16,20 +16,23 @@
 
     This firmware is a nearly complete rewrite of the sprinter firmware
     by kliment (https://github.com/kliment/Sprinter)
-    which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+    which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm
+  firmware.
 
-  Functions in this file are used to communicate using ascii or repetier protocol.
+  Functions in this file are used to communicate using ascii or repetier
+  protocol.
 */
 
 #include "Repetier.h"
 
 #if DISTORTION_CORRECTION
-
+// SB
 #if (DRIVE_SYSTEM == DELTA)
     #if (DISTORTION_EXTRAPOLATE_CORNERS != 0) && (DISTORTION_EXTRAPOLATE_CORNERS != 1) && (DISTORTION_EXTRAPOLATE_CORNERS != 2)
         #error DISTORTION_EXTRAPOLATE_CORNERS is - 0 For extrpolate only corner - 1 For extrpolate only corner - 2 Extrapolate all poits to externare circle.
     #endif
 #endif
+// SB
 
 Distortion Printer::distortion;
 
@@ -37,47 +40,58 @@ void Printer::measureDistortion(void) {
     prepareForProbing();
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
     float actTemp[NUM_EXTRUDER];
-    for(int i = 0; i < NUM_EXTRUDER; i++)
+    for (int i = 0; i < NUM_EXTRUDER; i++)
         actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::max(EEPROM::zProbeHeight(), static_cast<float>(ZHOME_HEAT_HEIGHT)), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+    Printer::moveToReal(
+        IGNORE_COORDINATE, IGNORE_COORDINATE,
+        RMath::max(EEPROM::zProbeHeight(), static_cast<float>(ZHOME_HEAT_HEIGHT)),
+        IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
     Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
-    for(int i = 0; i < NUM_EXTRUDER; i++) {
-        Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, false);
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        Extruder::setTemperatureForExtruder(
+            RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i,
+            false, false);
     }
-    for(int i = 0; i < NUM_EXTRUDER; i++) {
-        if(extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-            Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, true);
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+            Extruder::setTemperatureForExtruder(
+                RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i,
+                false, true);
     }
 #else
-    if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-        Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), Extruder::current->id, false, true);
+    if (extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+        Extruder::setTemperatureForExtruder(
+            RMath::max(actTemp[Extruder::current->id],
+                       static_cast<float>(ZPROBE_MIN_TEMPERATURE)),
+            Extruder::current->id, false, true);
 #endif
 #endif
     float oldFeedrate = Printer::feedrate;
 
-
     Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
 
-    if(!distortion.measure()) {
+    if (!distortion.measure()) {
         GCode::fatalError(PSTR("G33 failed!"));
         return;
     }
     Printer::feedrate = oldFeedrate;
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
-    for(int i = 0; i < NUM_EXTRUDER; i++)
+    for (int i = 0; i < NUM_EXTRUDER; i++)
         Extruder::setTemperatureForExtruder(actTemp[i], i, false, false);
-    for(int i = 0; i < NUM_EXTRUDER; i++)
-        Extruder::setTemperatureForExtruder(actTemp[i], i, false, actTemp[i] > MAX_ROOM_TEMPERATURE);
+    for (int i = 0; i < NUM_EXTRUDER; i++)
+        Extruder::setTemperatureForExtruder(actTemp[i], i, false,
+                                            actTemp[i] > MAX_ROOM_TEMPERATURE);
 #else
-    Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
+    Extruder::setTemperatureForExtruder(
+        actTemp[Extruder::current->id], Extruder::current->id, false,
+        actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
 #endif
 #endif
 }
 
-Distortion::Distortion() {
-}
+Distortion::Distortion() {}
 
 void Distortion::init() {
     updateDerived();
@@ -96,12 +110,14 @@ void Distortion::updateDerived() {
 #if DRIVE_SYSTEM == DELTA
     step = (2 * Printer::axisStepsPerMM[Z_AXIS] * DISTORTION_CORRECTION_R) / (DISTORTION_CORRECTION_POINTS - 1.0f);
     radiusCorrectionSteps = DISTORTION_CORRECTION_R * Printer::axisStepsPerMM[Z_AXIS];
-    #if (DISTORTION_EXTRAPOLATE_CORNERS == 2)
+	// SB
+	#if (DISTORTION_EXTRAPOLATE_CORNERS == 2)
     iradius = ( ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2 ) + 0.1;
     cix = ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2;
     ciy = ( DISTORTION_CORRECTION_POINTS - 1.0f ) / 2;
     iradius = iradius * iradius;
     #endif
+	// SB
 #else
     xCorrectionSteps = (DISTORTION_XMAX - DISTORTION_XMIN) * Printer::axisStepsPerMM[X_AXIS] / (DISTORTION_CORRECTION_POINTS - 1);
     xOffsetSteps = DISTORTION_XMIN * Printer::axisStepsPerMM[X_AXIS];
@@ -113,26 +129,33 @@ void Distortion::updateDerived() {
     zEnd = DISTORTION_END_HEIGHT * Printer::axisStepsPerMM[Z_AXIS] + Printer::zMinSteps;
 }
 
-void Distortion::enable(bool permanent) {
+void Distortion::enable(bool permanent, bool silent) {
     enabled = true;
 #if DISTORTION_PERMANENT && EEPROM_MODE != 0
-    if(permanent)
+    if (permanent)
         EEPROM::setZCorrectionEnabled(enabled);
 #endif
-    Com::printFLN(Com::tZCorrectionEnabled);
+    if (!silent) {
+        Com::printFLN(Com::tZCorrectionEnabled);
+    }
+    // Problem is now we do not include the extra steps required
+    Printer::updateCurrentPosition(false);
 }
 
-void Distortion::disable(bool permanent) {
+void Distortion::disable(bool permanent, bool silent) {
     enabled = false;
 #if DISTORTION_PERMANENT && EEPROM_MODE != 0
-    if(permanent)
+    if (permanent)
         EEPROM::setZCorrectionEnabled(enabled);
 #endif
 #if DRIVE_SYSTEM != DELTA
     Printer::zCorrectionStepsIncluded = 0;
 #endif
-    Printer::updateCurrentPosition(false);
-    Com::printFLN(Com::tZCorrectionDisabled);
+    Printer::updateCurrentPosition(
+        false); // now we have a different z height ignoring extra steps included
+    if (!silent) {
+        Com::printFLN(Com::tZCorrectionDisabled);
+    }
 }
 
 void Distortion::reportStatus() {
@@ -141,7 +164,8 @@ void Distortion::reportStatus() {
 
 void Distortion::resetCorrection(void) {
     Com::printInfoFLN(PSTR("Resetting Z correction"));
-    for(int i = 0; i < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS; i++)
+    for (int i = 0;
+         i < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS; i++)
         setMatrix(0, i);
 }
 
@@ -167,26 +191,40 @@ void Distortion::setMatrix(int32_t val, int index) {
 }
 
 bool Distortion::isCorner(fast8_t i, fast8_t j) const {
-    return (i == 0 || i == DISTORTION_CORRECTION_POINTS - 1)
-           && (j == 0 || j == DISTORTION_CORRECTION_POINTS - 1);
+    return (i == 0 || i == DISTORTION_CORRECTION_POINTS - 1) && (j == 0 || j == DISTORTION_CORRECTION_POINTS - 1);
 }
 
+// SB
 bool Distortion::isExternalRadiusPoint(fast8_t ix, fast8_t iy) const {
     return ( ((ix-cix)*(ix-cix) + (iy-ciy)*(iy-ciy)) > iradius );
 }
-
+// SB
 /**
- Extrapolates the changes from p1 to p2 to p3 which has the same distance as p1-p2.
+ Extrapolates the changes from p1 to p2 to p3 which has the same distance as
+ p1-p2.
 */
-inline int32_t Distortion::extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2, fast8_t y2) const {
+inline int32_t Distortion::extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2,
+                                            fast8_t y2) const {
     return 2 * getMatrix(matrixIndex(x2, y2)) - getMatrix(matrixIndex(x1, y1));
 }
 
-void Distortion::extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy) {
+void Distortion::extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx,
+                                   fast8_t dy) {
     setMatrix((extrapolatePoint(x + 2 * dx, y, x + dx, y) + extrapolatePoint(x, y + 2 * dy, x, y + dy)) / 2.0,
               matrixIndex(x, y));
 }
 
+/* SB
+void Distortion::extrapolateCorners() {
+    const fast8_t m = DISTORTION_CORRECTION_POINTS - 1;
+    extrapolateCorner(0, 0, 1, 1);
+    extrapolateCorner(0, m, 1, -1);
+    extrapolateCorner(m, 0, -1, 1);
+    extrapolateCorner(m, m, -1, -1);
+}
+*/
+
+// SB
 void Distortion::extrapolateCorners(fast8_t ix, fast8_t iy) {
 	const fast8_t icx = (DISTORTION_CORRECTION_POINTS - 1) - ix;
 	const fast8_t icy = (DISTORTION_CORRECTION_POINTS - 1) - iy;
@@ -212,49 +250,66 @@ void Distortion::extrapolateCornersCircular(void) {
         }
     }
 }
+// SB
 
 bool Distortion::measure(void) {
     fast8_t ix, iy;
 
     disable(false);
-	Printer::prepareForProbing();
-    float z = RMath::max(EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), static_cast<float>(ZHOME_HEAT_HEIGHT)); //EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
+    Printer::prepareForProbing();
+    float z = RMath::max(
+        EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0),
+        static_cast<float>(ZHOME_HEAT_HEIGHT)); // EEPROM::zProbeBedDistance() +
+                                                // (EEPROM::zProbeHeight() > 0 ?
+                                                // EEPROM::zProbeHeight() : 0);
     Com::printFLN(PSTR("Reference Z for measurement:"), z, 3);
     updateDerived();
-/*
-#if DRIVE_SYSTEM == DELTA
-    // It is not possible to go to the edges at the top, also users try
-    // it often and wonder why the coordinate system is then wrong.
-    // For that reason we ensure a correct behavior by code.
-    Printer::homeAxis(true, true, true);
-    Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-#else
-    if(!Printer::isXHomed() || !Printer::isYHomed())
-        Printer::homeAxis(true, true, false);
-    Printer::updateCurrentPosition(true);
-    Printer::moveTo(Printer::invAxisStepsPerMM[X_AXIS] * ((isCorner(0, 0) ? 1 : 0) * xCorrectionSteps + xOffsetSteps), Printer::invAxisStepsPerMM[Y_AXIS] * ((DISTORTION_CORRECTION_POINTS - 1) * yCorrectionSteps + yOffsetSteps), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
-#endif
-*/
-    //Com::printFLN(PSTR("radiusCorr:"), radiusCorrectionSteps);
-    //Com::printFLN(PSTR("steps:"), step);
+    /*
+  #if DRIVE_SYSTEM == DELTA
+      // It is not possible to go to the edges at the top, also users try
+      // it often and wonder why the coordinate system is then wrong.
+      // For that reason we ensure a correct behavior by code.
+      Printer::homeAxis(true, true, true);
+      Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE,
+  EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ?
+  EEPROM::zProbeHeight() : 0), IGNORE_COORDINATE,
+  Printer::homingFeedrate[Z_AXIS]); #else if(!Printer::isXHomed() ||
+  !Printer::isYHomed()) Printer::homeAxis(true, true, false);
+      Printer::updateCurrentPosition(true);
+      Printer::moveTo(Printer::invAxisStepsPerMM[X_AXIS] * ((isCorner(0, 0) ? 1
+  : 0) * xCorrectionSteps + xOffsetSteps), Printer::invAxisStepsPerMM[Y_AXIS] *
+  ((DISTORTION_CORRECTION_POINTS - 1) * yCorrectionSteps + yOffsetSteps),
+  IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed()); #endif
+  */
+    // Com::printFLN(PSTR("radiusCorr:"), radiusCorrectionSteps);
+    // Com::printFLN(PSTR("steps:"), step);
     int32_t zCorrection = 0;
 #if Z_PROBE_Z_OFFSET_MODE == 1
     zCorrection -= Printer::zBedOffset * Printer::axisStepsPerMM[Z_AXIS];
 #endif
 
-    Printer::startProbing(true);
-    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, z, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-    for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0; iy--)
-        for (ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++) {
-#if (DRIVE_SYSTEM == DELTA) && (DISTORTION_EXTRAPOLATE_CORNERS == 1)
-            if (isCorner(ix, iy)) continue;
+    if (!Printer::startProbing(true)) {
+        return false;
+    }
+    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, z,
+                        IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+    for (iy = 0; iy < DISTORTION_CORRECTION_POINTS; iy++)
+        for (fast8_t iix = 0; iix < DISTORTION_CORRECTION_POINTS; iix++) {
+            ix = iy & 1 ? DISTORTION_CORRECTION_POINTS - 1 - iix : iix;
+#if (DRIVE_SYSTEM == DELTA) && DISTORTION_EXTRAPOLATE_CORNERS
+            if (isCorner(ix, iy))
+                continue;
 #endif
+
+// SB
 #if (DRIVE_SYSTEM == DELTA) && (DISTORTION_EXTRAPOLATE_CORNERS == 2)
             if (isExternalRadiusPoint(ix, iy)) {
 				setMatrix(floor(DISTORTION_LIMIT_TO * Printer::axisStepsPerMM[Z_AXIS]), matrixIndex(ix, iy));
 				continue;
 			}
 #endif
+// SB
+
 #if DRIVE_SYSTEM == DELTA
             float mtx = Printer::invAxisStepsPerMM[X_AXIS] * (ix * step - radiusCorrectionSteps);
             float mty = Printer::invAxisStepsPerMM[Y_AXIS] * (iy * step - radiusCorrectionSteps);
@@ -262,18 +317,20 @@ bool Distortion::measure(void) {
             float mtx = Printer::invAxisStepsPerMM[X_AXIS] * (ix * xCorrectionSteps + xOffsetSteps);
             float mty = Printer::invAxisStepsPerMM[Y_AXIS] * (iy * yCorrectionSteps + yOffsetSteps);
 #endif
-            //Com::printF(PSTR("mx "),mtx);
-            //Com::printF(PSTR("my "),mty);
-            //Com::printF(PSTR("ix "),(int)ix);
-            //Com::printFLN(PSTR("iy "),(int)iy);
-            Printer::moveToReal(mtx, mty, z, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
+            // Com::printF(PSTR("mx "),mtx);
+            // Com::printF(PSTR("my "),mty);
+            // Com::printF(PSTR("ix "),(int)ix);
+            // Com::printFLN(PSTR("iy "),(int)iy);
+            Printer::moveToReal(mtx, mty, z, IGNORE_COORDINATE,
+                                EEPROM::zProbeXYSpeed());
             float zp = Printer::runZProbe(false, false, Z_PROBE_REPETITIONS);
 #if defined(DISTORTION_LIMIT_TO) && DISTORTION_LIMIT_TO != 0
-            if(zp == ILLEGAL_Z_PROBE || fabs(z - zp + zCorrection * Printer::invAxisStepsPerMM[Z_AXIS]) > DISTORTION_LIMIT_TO) {
+            if (zp == ILLEGAL_Z_PROBE || fabs(z - zp + zCorrection * Printer::invAxisStepsPerMM[Z_AXIS]) > DISTORTION_LIMIT_TO) {
 #else
-            if(zp == ILLEGAL_Z_PROBE) {
+            if (zp == ILLEGAL_Z_PROBE) {
 #endif
-                Com::printErrorFLN(PSTR("Stopping distortion measurement due to errors."));
+                Com::printErrorFLN(
+                    PSTR("Stopping distortion measurement due to errors."));
                 Printer::finishProbing();
                 return false;
             }
@@ -281,56 +338,75 @@ bool Distortion::measure(void) {
                       matrixIndex(ix, iy));
         }
     Printer::finishProbing();
-	
-	// Print Matrix csv format before to extrapolate out pointer.
+	// SB - Print Matrix csv format before to extrapolate out pointer.
 	printMatrixCsv( true );
-	
+
+/* SB
+#if (DRIVE_SYSTEM == DELTA) && DISTORTION_EXTRAPOLATE_CORNERS
+    extrapolateCorners();
+#endif
+*/
+
+// SB
 #if (DRIVE_SYSTEM == DELTA) && (DISTORTION_EXTRAPOLATE_CORNERS == 1)
     extrapolateCorners((DISTORTION_CORRECTION_POINTS - 1), (DISTORTION_CORRECTION_POINTS - 1));
 #endif
+// SB
+
     // make average center
-    // Disabled since we can use grid measurement to get average plane if that is what we want.
-    // Shifting z with each measuring is a pain and can result in unexpected behavior.
+    // Disabled since we can use grid measurement to get average plane if that is
+    // what we want. Shifting z with each measuring is a pain and can result in
+    // unexpected behavior.
     /*
-    float sum = 0;
-    for(int k = 0;k < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS; k++)
-        sum += getMatrix(k);
-    sum /= static_cast<float>(DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS);
-    for(int k = 0;k < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS; k++)
-        setMatrix(getMatrix(k) - sum, k);
-    Printer::zLength -= sum * Printer::invAxisStepsPerMM[Z_AXIS];
-    */
+  float sum = 0;
+  for(int k = 0;k < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS;
+  k++) sum += getMatrix(k); sum /=
+  static_cast<float>(DISTORTION_CORRECTION_POINTS *
+  DISTORTION_CORRECTION_POINTS); for(int k = 0;k < DISTORTION_CORRECTION_POINTS
+  * DISTORTION_CORRECTION_POINTS; k++) setMatrix(getMatrix(k) - sum, k);
+  Printer::zLength -= sum * Printer::invAxisStepsPerMM[Z_AXIS];
+  */
+// SB
 #if (DRIVE_SYSTEM == DELTA) && (DISTORTION_EXTRAPOLATE_CORNERS == 2)
     extrapolateCornersCircular();
 #endif
+// SB
+
 #if EEPROM_MODE
     EEPROM::storeDataIntoEEPROM();
 #endif
-    // print matrix csv format after to extrapolate out pointer.
+	// SB
+	// print matrix csv format after to extrapolate out pointer.
 	printMatrixCsv( true );
-    // show matrix
+	// SB
+    // print matrix
+    Com::printInfoFLN(PSTR("Distortion correction matrix:"));
+    for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0; iy--) {
+        for (ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++)
+            Com::printF(ix ? PSTR(", ") : PSTR(""), getMatrix(matrixIndex(ix, iy)));
+        Com::println();
+    }
     showMatrix();
     enable(true);
     return true;
-    //Printer::homeAxis(false, false, true);
+    // Printer::homeAxis(false, false, true);
 }
 
-
 int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const {
-	if (!enabled || Printer::isZProbingActive()) {
-		return 0;
-	}
-	z += Printer::offsetZ * Printer::axisStepsPerMM[Z_AXIS] - Printer::zMinSteps;
-    if (z > zEnd) {
-        /* Com::printF(PSTR("NoCor z:"),z);
-         Com::printF(PSTR(" zEnd:"),zEnd);
-         Com::printF(PSTR(" en:"),(int)enabled);
-         Com::printFLN(PSTR(" zp:"),(int)Printer::isZProbingActive());*/
+    if (!enabled || Printer::isZProbingActive()) {
         return 0;
     }
-	x -= Printer::offsetX * Printer::axisStepsPerMM[X_AXIS]; // correct active tool offset
-	y -= Printer::offsetY * Printer::axisStepsPerMM[Y_AXIS];
-    if(false) {
+    z += Printer::offsetZ * Printer::axisStepsPerMM[Z_AXIS] - Printer::zMinSteps;
+    if (z > zEnd) {
+        /* Com::printF(PSTR("NoCor z:"),z);
+     Com::printF(PSTR(" zEnd:"),zEnd);
+     Com::printF(PSTR(" en:"),(int)enabled);
+     Com::printFLN(PSTR(" zp:"),(int)Printer::isZProbingActive());*/
+        return 0;
+    }
+    x -= Printer::offsetX * Printer::axisStepsPerMM[X_AXIS]; // correct active tool offset
+    y -= Printer::offsetY * Printer::axisStepsPerMM[Y_AXIS];
+    if (false) {
         Com::printF(PSTR("correcting ("), x);
         Com::printF(PSTR(","), y);
     }
@@ -347,7 +423,8 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const {
 #endif
 // indexes to the matrix
 
-// position between cells of matrix, range=0 to 1 - outside of the matrix the value will be outside this range and the value will be extrapolated
+// position between cells of matrix, range=0 to 1 - outside of the matrix the
+// value will be outside this range and the value will be extrapolated
 #if DRIVE_SYSTEM == DELTA
     int32_t fx = x - fxFloor * step; // Grid normalized coordinates
     int32_t fy = y - fyFloor * step;
@@ -373,20 +450,20 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const {
     int32_t zx1 = m11 + ((m12 - m11) * fx) / step;
     int32_t zx2 = m21 + ((m22 - m21) * fx) / step;
     int32_t correction_z = zx1 + ((zx2 - zx1) * fy) / step;
-	/*if(z == Printer::zMinSteps) {
-	Com::printF(PSTR("DT M11:"),m11);
-	Com::printF(PSTR(" M12:"),m12);
-	Com::printF(PSTR(" M21:"),m21);
-	Com::printF(PSTR(" M22:"),m22);
-	Com::printF(PSTR(" FX:"),fx);
-	Com::printF(PSTR(" FY:"),fy);
-	Com::printF(PSTR(" FFX:"),fxFloor);
-	Com::printF(PSTR(" FFY:"),fyFloor);
-	Com::printF(PSTR(" XP:"),x-radiusCorrectionSteps);
-	Com::printF(PSTR(" Yp:"),y-radiusCorrectionSteps);
-	Com::printF(PSTR(" STEP:"),step);
-	Com::printFLN(PSTR(" ZCOR:"),correction_z);
-	}*/
+    /*if(z == Printer::zMinSteps) {
+  Com::printF(PSTR("DT M11:"),m11);
+  Com::printF(PSTR(" M12:"),m12);
+  Com::printF(PSTR(" M21:"),m21);
+  Com::printF(PSTR(" M22:"),m22);
+  Com::printF(PSTR(" FX:"),fx);
+  Com::printF(PSTR(" FY:"),fy);
+  Com::printF(PSTR(" FFX:"),fxFloor);
+  Com::printF(PSTR(" FFY:"),fyFloor);
+  Com::printF(PSTR(" XP:"),x-radiusCorrectionSteps);
+  Com::printF(PSTR(" Yp:"),y-radiusCorrectionSteps);
+  Com::printF(PSTR(" STEP:"),step);
+  Com::printFLN(PSTR(" ZCOR:"),correction_z);
+  }*/
 #else
     int32_t fx = x - fxFloor * xCorrectionSteps; // Grid normalized coordinates
     int32_t fy = y - fyFloor * yCorrectionSteps;
@@ -414,35 +491,37 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const {
     int32_t correction_z = zx1 + ((zx2 - zx1) * fy) / yCorrectionSteps;
 #endif
     /* if(false) {
-       Com::printF(PSTR(") by "), correction_z);
-       Com::printF(PSTR(" ix= "), fxFloor); Com::printF(PSTR(" fx= "), (float)fx/(float)xCorrectionSteps,3);
-       Com::printF(PSTR(" iy= "), fyFloor); Com::printFLN(PSTR(" fy= "), (float)fy/(float)yCorrectionSteps,3);
-     }*/
+     Com::printF(PSTR(") by "), correction_z);
+     Com::printF(PSTR(" ix= "), fxFloor); Com::printF(PSTR(" fx= "),
+   (float)fx/(float)xCorrectionSteps,3); Com::printF(PSTR(" iy= "), fyFloor);
+   Com::printFLN(PSTR(" fy= "), (float)fy/(float)yCorrectionSteps,3);
+   }*/
     if (z > zStart && z > Printer::zMinSteps)
-        //All variables are type int. For calculation we need float values
+        // All variables are type int. For calculation we need float values
         correction_z = (correction_z * static_cast<float>(zEnd - z) / (zEnd - zStart));
     /* if(correction_z > 20 || correction_z < -20) {
-             Com::printFLN(PSTR("Corr. error too big:"),correction_z);
-         Com::printF(PSTR("fxf"),(int)fxFloor);
-         Com::printF(PSTR(" fyf"),(int)fyFloor);
-         Com::printF(PSTR(" fx"),fx);
-         Com::printF(PSTR(" fy"),fy);
-         Com::printF(PSTR(" x"),x);
-         Com::printFLN(PSTR(" y"),y);
-         Com::printF(PSTR(" m11:"),m11);
-         Com::printF(PSTR(" m12:"),m12);
-         Com::printF(PSTR(" m21:"),m21);
-         Com::printF(PSTR(" m22:"),m22);
-         Com::printFLN(PSTR(" step:"),step);
-         correction_z = 0;
-     }*/
+           Com::printFLN(PSTR("Corr. error too big:"),correction_z);
+       Com::printF(PSTR("fxf"),(int)fxFloor);
+       Com::printF(PSTR(" fyf"),(int)fyFloor);
+       Com::printF(PSTR(" fx"),fx);
+       Com::printF(PSTR(" fy"),fy);
+       Com::printF(PSTR(" x"),x);
+       Com::printFLN(PSTR(" y"),y);
+       Com::printF(PSTR(" m11:"),m11);
+       Com::printF(PSTR(" m12:"),m12);
+       Com::printF(PSTR(" m21:"),m21);
+       Com::printF(PSTR(" m22:"),m22);
+       Com::printFLN(PSTR(" step:"),step);
+       correction_z = 0;
+   }*/
     return correction_z;
 }
 
 void Distortion::set(float x, float y, float z) {
 #if defined(DISTORTION_LIMIT_TO) && DISTORTION_LIMIT_TO != 0
-    if(fabs(z) > DISTORTION_LIMIT_TO) {
-        Com::printWarningFLN(PSTR("Max. distortion value exceeded - not setting this value."));
+    if (fabs(z) > DISTORTION_LIMIT_TO) {
+        Com::printWarningFLN(
+            PSTR("Max. distortion value exceeded - not setting this value."));
         return;
     }
 #endif
@@ -453,17 +532,21 @@ void Distortion::set(float x, float y, float z) {
     int ix = (x * Printer::axisStepsPerMM[X_AXIS] - xOffsetSteps + xCorrectionSteps / 2) / xCorrectionSteps;
     int iy = (y * Printer::axisStepsPerMM[Y_AXIS] - yOffsetSteps + yCorrectionSteps / 2) / yCorrectionSteps;
 #endif
-    if(ix < 0) ix = 0;
-    if(iy < 0) iy = 0;
-    if(ix >= DISTORTION_CORRECTION_POINTS - 1) ix = DISTORTION_CORRECTION_POINTS - 1;
-    if(iy >= DISTORTION_CORRECTION_POINTS - 1) iy = DISTORTION_CORRECTION_POINTS - 1;
+    if (ix < 0)
+        ix = 0;
+    if (iy < 0)
+        iy = 0;
+    if (ix >= DISTORTION_CORRECTION_POINTS - 1)
+        ix = DISTORTION_CORRECTION_POINTS - 1;
+    if (iy >= DISTORTION_CORRECTION_POINTS - 1)
+        iy = DISTORTION_CORRECTION_POINTS - 1;
     int32_t idx = matrixIndex(ix, iy);
     setMatrix(z * Printer::axisStepsPerMM[Z_AXIS], idx);
 }
 
 void Distortion::showMatrix() {
-    for(int ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++) {
-        for(int iy = 0; iy < DISTORTION_CORRECTION_POINTS; iy++) {
+    for (int ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++) {
+        for (int iy = 0; iy < DISTORTION_CORRECTION_POINTS; iy++) {
 #if DRIVE_SYSTEM == DELTA
             float x = (-radiusCorrectionSteps + ix * step) * Printer::invAxisStepsPerMM[Z_AXIS];
             float y = (-radiusCorrectionSteps + iy * step) * Printer::invAxisStepsPerMM[Z_AXIS];
@@ -480,6 +563,7 @@ void Distortion::showMatrix() {
     }
 }
 
+// SB
 void Distortion::printMatrixCsv( bool raw ) {
     fast8_t ix, iy;
     Com::printInfoF(PSTR("Distortion correction matrix CSV "));
