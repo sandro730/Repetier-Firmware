@@ -11,7 +11,7 @@ G33 R0      ; G33 R0      - Resets distortion matrix to 0
 G1 X0       Y0   Z30     ; Move to center Z=30
 ;
 G1 X0       Y0           ; To Center
-G30                      ; I want Test whitch G30 P0
+G30
 G1 X-116.91 Y-67.50      ; Tower X
 G30
 G1	X116.91 Y-67.50      ; Tower Y
