@@ -1,5 +1,5 @@
 ;
-: First Calibration
+; First Calibration
 ;
 G28         ; Home
 ;           ; M320 S<0/1> - Activate auto level, S1 stores it in eeprom
