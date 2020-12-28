@@ -216,9 +216,8 @@ pins. Separate multiple GCODEs with \n
 #define MICRO_STEPS 16
 
 // Calculations
-#define AXIS_STEPS_PER_MM ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
-// SB Provato con comparatore AXIS_STEPS_PER_MM 01.0095 o 101.0101
-// SB 2017/01/06 Corretto con 100.
+#define AXIS_STEPS_PER_MM \
+    ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
 #define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
@@ -662,7 +661,9 @@ you should prefer the second method.
 */
 #define SCALE_PID_TO_MAX 0
 
-#define HEATER_PWM_SPEED 1 // How fast ist pwm signal 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 = 122.06Hz
+#define HEATER_PWM_SPEED \
+    1 // How fast ist pwm signal 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 = \
+        // 122.06Hz
 
 /** Temperature range for target temperature to hold in M109 command. 5 means
 +/-5 degC
@@ -921,7 +922,8 @@ automatically disabled.
 #define SUPPORT_LASER 0 // set 1 to enable laser support
 #define LASER_PIN -1    // set to pin enabling laser
 #define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
-#define LASER_WARMUP_TIME 0 // wait x milliseconds to start material burning before move
+#define LASER_WARMUP_TIME \
+    0                     // wait x milliseconds to start material burning before move
 #define LASER_PWM_MAX 255 // 255 8-bit PWM 4095 for 12Bit PWM
 #define LASER_WATT 1.6    // Laser diode power
 
@@ -938,14 +940,17 @@ direction. It also can add a delay to wait for spindle to run on full speed.
 
 #define SUPPORT_CNC 0          // Set 1 for CNC support
 #define CNC_WAIT_ON_ENABLE 300 // wait x milliseconds after enabling
-#define CNC_WAIT_ON_DISABLE 0 // delay in milliseconds after disabling spindle. May be required for direction changes.
+#define CNC_WAIT_ON_DISABLE \
+    0                        // delay in milliseconds after disabling spindle. May be required for \
+        // direction changes.
 #define CNC_ENABLE_PIN -1    // Pin to enable mill
 #define CNC_ENABLE_WITH 1    // Set 0 if low enables spindle
 #define CNC_DIRECTION_PIN -1 // Set to pin if direction control is possible
 #define CNC_DIRECTION_CW 1   // Set signal required for clockwise rotation
 #define CNC_PWM_MAX 255      // 255 8-bit PWM 4095 for 12Bit PWM
 #define CNC_RPM_MAX 25000    // max spindle RPM
-#define CNC_SAFE_Z 150  // Safe Z height so tool is outside object, used for pause
+#define CNC_SAFE_Z \
+    150 // Safe Z height so tool is outside object, used for pause
 
 /* Select the default mode when the printer gets enables. Possible values are
 PRINTER_MODE_FFF 0
@@ -1127,8 +1132,9 @@ on this endstop.
 // SB #define Z_MAX_LENGTH 116.820
 #define Z_MAX_LENGTH 323
 
-// Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
-// of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
+// Coordinates for the minimum axis. Can also be negative if you want to have
+// the bed start at 0 and the printer can go to the left side of the bed.
+// Maximum coordinate is given by adding the above X_MAX_LENGTH values.
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
@@ -1149,7 +1155,8 @@ on this endstop.
 
 // Microstep setting (Only functional when stepper driver microstep pins are
 // connected to MCU. Currently only works for RAMBO boards
-// SB #define MICROSTEP_MODES { 8, 8, 8, 8, 8 } // [1,2,4,8,16]
+// SB #define MICROSTEP_MODES \
+// SB    { 8, 8, 8, 8, 8 } // [1,2,4,8,16]
 #define MICROSTEP_MODES {16,16,16,16,16} // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are
@@ -1207,7 +1214,8 @@ on this endstop.
 #define DELTA_ALPHA_B 330
 #define DELTA_ALPHA_C 90
 
-/** Correct radius by this value for each column. Perfect builds have 0 everywhere. */
+/** Correct radius by this value for each column. Perfect builds have 0
+ * everywhere. */
 #define DELTA_RADIUS_CORRECTION_A 0
 #define DELTA_RADIUS_CORRECTION_B 0
 #define DELTA_RADIUS_CORRECTION_C 0
@@ -1846,8 +1854,10 @@ to recalibrate z.
 #define Z_PROBE_X_OFFSET 6.0
 // SB #define Z_PROBE_Y_OFFSET 0
 #define Z_PROBE_Y_OFFSET 23.5
-// SB #define Z_PROBE_BED_DISTANCE 5.0 // Higher than max bed level distance error in mm
-#define Z_PROBE_BED_DISTANCE 30.0
+// SB #define Z_PROBE_BED_DISTANCE \
+// SB     5.0 // Higher than max bed level distance error in mm
+#define Z_PROBE_BED_DISTANCE \
+    30.0 // Higher than max bed level distance error in mm
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
@@ -1860,8 +1870,10 @@ to recalibrate z.
 #define Z_PROBE_DELAY 0
 // SB #define Z_PROBE_XY_SPEED 150
 #define Z_PROBE_XY_SPEED 1000
-// SB #define Z_PROBE_SWITCHING_DISTANCE 1.5 // Distance to safely switch off probe after it was activated
-#define Z_PROBE_SWITCHING_DISTANCE 2
+// SB #define Z_PROBE_SWITCHING_DISTANCE \
+// SB    1.5                       // Distance to safely switch off probe after it was activated
+#define Z_PROBE_SWITCHING_DISTANCE \
+    2.0                       // Distance to safely switch off probe after it was activated
 // SB #define Z_PROBE_REPETITIONS 5 // Repetitions for probing at one point.
 #define Z_PROBE_REPETITIONS 3
 #define Z_PROBE_USE_MEDIAN \
