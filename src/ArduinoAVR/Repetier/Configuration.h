@@ -218,6 +218,8 @@ pins. Separate multiple GCODEs with \n
 // Calculations
 #define AXIS_STEPS_PER_MM \
     ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
+// SB Provato con comparatore AXIS_STEPS_PER_MM 01.0095 o 101.0101
+// SB 2017/01/06 Corretto con 100.
 #define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
@@ -424,7 +426,8 @@ codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you
  * turn the extruder on, the fan goes on. */
-#define EXT0_EXTRUDER_COOLER_PIN -1
+// SB #define EXT0_EXTRUDER_COOLER_PIN -1
+#define EXT0_EXTRUDER_COOLER_PIN 6
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then
@@ -1126,11 +1129,11 @@ on this endstop.
 // is at its home position. If EEPROM is enabled these values will be overridden
 // with the values in the EEPROM
 // SB #define X_MAX_LENGTH 165
-#define X_MAX_LENGTH 135
+#define X_MAX_LENGTH 140
 // SB #define Y_MAX_LENGTH 175
-#define Y_MAX_LENGTH 135
+#define Y_MAX_LENGTH 140
 // SB #define Z_MAX_LENGTH 116.820
-#define Z_MAX_LENGTH 323
+#define Z_MAX_LENGTH 306
 
 // Coordinates for the minimum axis. Can also be negative if you want to have
 // the bed start at 0 and the printer can go to the left side of the bed.
@@ -1189,7 +1192,9 @@ on this endstop.
  */
 // SB #define DELTA_DIAGONAL_ROD 345 // mm
 // SB Calcolato con foglio My_Calibration_Calculus.xlsx 372,7397399511
-#define DELTA_DIAGONAL_ROD 372.74 // mm
+// SB #define DELTA_DIAGONAL_ROD 372.74 // mm
+// SB Riporto i valori teorici
+#define DELTA_DIAGONAL_ROD 370.80 // mm
 
 /*  =========== Parameter essential for delta calibration ===================
 
@@ -1227,7 +1232,9 @@ on this endstop.
 
 /** Max. radius (mm) the printer should be able to reach. */
 // SB #define DELTA_MAX_RADIUS 200
-#define DELTA_MAX_RADIUS 160
+// SB #define DELTA_MAX_RADIUS 160
+// SB - Portato valore a 165 per sondare il punto X0 Y-140
+#define DELTA_MAX_RADIUS 164
 
 // Margin (mm) to avoid above tower minimum (xMin xMinsteps)
 // If your printer can put its carriage low enough the rod is horizontal without
@@ -1255,7 +1262,9 @@ on this endstop.
 // SB #define PRINTER_RADIUS 124
 // SB #define PRINTER_RADIUS (CARRIAGE_HORIZONTAL_OFFSET + MY_ROD_RADIUS + END_EFFECTOR_HORIZONTAL_OFFSET )
 // SB #define PRINTER_RADIUS 187.123
-#define PRINTER_RADIUS 187.255
+// SB #define PRINTER_RADIUS 187.255
+// SB Riporto i valori teorici
+#define PRINTER_RADIUS 186.051
 
 /** 1 for more precise delta moves. 0 for faster computation.
 Needs a bit more computation time. */
@@ -1557,8 +1566,9 @@ because there are no errors slowing down the connection
  Overridden if EEPROM activated.
 */
 //#define BAUDRATE 76800
-#define BAUDRATE 115200
+// SB #define BAUDRATE 115200
 //#define BAUDRATE 250000
+#define BAUDRATE 250000
 
 /**
 Some boards like Gen7 have a power on pin, to enable the ATX power supply. If
@@ -1845,7 +1855,8 @@ to recalibrate z.
 // Disable all heaters before probing - required for inductive sensors
 #define Z_PROBE_DISABLE_HEATERS 0
 // SB #define Z_PROBE_PIN 63
-#define Z_PROBE_PIN ORIG_Y_MIN_PIN
+// SB #define Z_PROBE_PIN ORIG_Y_MIN_PIN
+#define Z_PROBE_PIN ORIG_Z_MIN_PIN
 // SB #define Z_PROBE_PULLUP 1
 #define Z_PROBE_PULLUP true
 // SB #define Z_PROBE_ON_HIGH 1
@@ -1857,7 +1868,13 @@ to recalibrate z.
 // SB #define Z_PROBE_BED_DISTANCE \
 // SB     5.0 // Higher than max bed level distance error in mm
 #define Z_PROBE_BED_DISTANCE \
-    30.0 // Higher than max bed level distance error in mm
+    14.554 // Higher than max bed level distance error in mm
+/* ### SB Note ###
+  Il firmware somma questo valore Z_PROBE_BED_DISTANCE con Z_PROBE_HEIGHT
+  per stabilire la quota in Z da cui partire per sondare.
+  Ho inserito il valore 14.554 per avere una quota di sondaggio pari a 30.
+  Z_PROBE_BED_DISTANCE = 30 - Z_PROBE_HEIGHT
+*/
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
@@ -1903,12 +1920,22 @@ This method measures at the 3 probe points and creates a plane through these
 points. If you have a really planar bed this gives the optimum result. The 3
 points must not be in one line and have a long distance to increase numerical
 stability.
+P3
+ X      
+
+ X   X
+P1   P2
 
 BED_LEVELING_METHOD 1
 This measures a grid. Probe point 1 is the origin and points 2 and 3 span a
 grid. We measure BED_LEVELING_GRID_SIZE points in each direction and compute a
 regression plane through all points. This gives a good overall plane if you have
 small bumps measuring inaccuracies.
+P3
+ XOOOO
+ OOOOO
+ XOOOX
+P1   P2
 
 BED_LEVELING_METHOD 2
 Bending correcting 4 point measurement. This is for cantilevered beds that have
@@ -1917,6 +1944,13 @@ bending on the axis and a symmetric bending to both sides of the axis. So probe
 points 2 and 3 build the symmetric axis and point 1 is mirrored to 1m across the
 axis. Using the symmetry we then remove the bending from 1 and use that as
 plane.
+      P3
+       X
+       |
+P1 X   X   X P1m
+       |
+       X
+      P2
 */
 #define BED_LEVELING_METHOD 0
 /* How to correct rotation.
@@ -1950,14 +1984,26 @@ motorized bed leveling */
 // SB #define Z_PROBE_X3 20
 // SB #define Z_PROBE_Y3 170
 
-// SB Valori per un raggio di 135
+// SB Valori per un raggio di 140
+
 #define FEATURE_AUTOLEVEL true
+#if BED_LEVELING_METHOD == 0
+#define AUTOLEVEL_R 140
+#define Z_PROBE_X1 -( AUTOLEVEL_R * 0.87 )
+#define Z_PROBE_Y1 -( AUTOLEVEL_R * 0.50 )
+#define Z_PROBE_X2  ( AUTOLEVEL_R * 0.87 )
+#define Z_PROBE_Y2 -( AUTOLEVEL_R * 0.50 )
+#define Z_PROBE_X3 0
+#define Z_PROBE_Y3 AUTOLEVEL_R
+#else
 #define Z_PROBE_X1 -116.913
 #define Z_PROBE_Y1 -67.5
 #define Z_PROBE_X2 116.913
 #define Z_PROBE_Y2 -67.5
 #define Z_PROBE_X3 0
 #define Z_PROBE_Y3 135
+#endif
+
 /* Bending correction adds a value to a measured z-probe value. This may be
   required when the z probe needs some force to trigger and this bends the
   bed down. Currently the correction values A/B/C correspond to z probe
@@ -1987,17 +2033,17 @@ motorized bed leveling */
 #define DISTORTION_LIMIT_TO 4
 /* For delta printers you simply define the measured radius around origin */
 // SB #define DISTORTION_CORRECTION_R 80
-#define DISTORTION_CORRECTION_R       135
+#define DISTORTION_CORRECTION_R       120
 /* For all others you define the correction rectangle by setting the min/max
  * coordinates. Make sure the the probe can reach all points! */
 // SB #define DISTORTION_XMIN 10
-#define DISTORTION_XMIN -135
+#define DISTORTION_XMIN -120
 // SB #define DISTORTION_YMIN 10
-#define DISTORTION_YMIN -135
+#define DISTORTION_YMIN -120
 // SB #define DISTORTION_XMAX 190
-#define DISTORTION_XMAX 135
+#define DISTORTION_XMAX 120
 // SB #define DISTORTION_YMAX 190
-#define DISTORTION_YMAX 135
+#define DISTORTION_YMAX 120
 
 /** Uses EEPROM instead of ram. Allows bigger matrix (up to 22x22) without any
   ram cost. Especially on arm based systems with cached EEPROM it is good, on
@@ -2088,6 +2134,13 @@ ended. Separate commands by \n */
  * Increases reliability especially for binary protocol. */
 #define FEATURE_CHECKSUM_FORCED 0
 
+// SB - Rrd Fan Extender
+// M42 P4 S0-255 - Led Verde Hardware Fan
+// M42 P5 S0-255 - Led Rosso HotEnd Fan
+
+// M42 P6  S0-255 - Led Verde HotEnd Fan
+// M42 P11 S0-255 - Led Rosso Hardware Fan
+
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN
 in 9 which is also used for the heater if you have 2 extruders connected. */
@@ -2095,9 +2148,9 @@ in 9 which is also used for the heater if you have 2 extruders connected. */
 
 /* You can have a second fan controlled by adding P1 to M106/M107 command. */
 // SB #define FEATURE_FAN2_CONTROL 0
-#define FEATURE_FAN2_CONTROL true
+#define FEATURE_FAN2_CONTROL false
 //#define FAN2_PIN ORIG_FAN2_PIN
-#define FAN2_PIN 6
+//#define FAN2_PIN 6
 
 /* By setting FAN_BOARD_PIN to a pin number you get a board cooler. That fan
 goes on as soon as moves occur. Mainly to prevent overheating of stepper

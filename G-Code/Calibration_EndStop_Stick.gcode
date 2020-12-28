@@ -9,7 +9,7 @@ M323 S0 P1  ; M323 S0/S1  - Enable disable distortion correction P0 = not perman
 G33 R0      ; G33 R0      - Resets distortion matrix to 0
 G131        ; G131        - Set extruder offset position to 0 - needed for calibration with G132
 ;
-G1 Z112
+G1 Z115
 @pause Get ready for X or Tower A
 M99 S10 X0
 @pause Done
@@ -22,3 +22,4 @@ M99 S10 Z0  ; M99  - M99 S<delayInSec> X0 Y0 Z0 - Disable motors for S seconds (
 ;
 G132 S1     ; G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
 ;
+

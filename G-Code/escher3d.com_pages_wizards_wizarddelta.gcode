@@ -11,17 +11,26 @@ G33 R0      ; G33 R0      - Resets distortion matrix to 0
 ;
 G1 X0       Y0   Z30  ; To Center
 ;
-G1 X-116.91 Y-67.50   ; Towers X
-G1 X0       Y-135.00  ; Point X-Y
-G30                   ; I want Test whitch G30 P0
-G1 X116.91  Y-67.50   ; Towers Y
+G1 X0       Y140      ; Tower C - Z
 G30
-G1 X116.91  Y67.50    ; Point Y-Z
+G1 X121.24  Y70.00
 G30
-G1 X0       Y135      ; Towers Z
+G1 X121.24  Y-70.00   ; Tower B - Y
 G30
-G1 X-116.91 Y67.50    ; Point Z-X
+G1 X0       Y-140.00
 G30
-G1 X0       Y0        ; To Center
+G1 X-121.24 Y-70.00   ; Tower A - X
 G30
+G1 X-121.24 Y70.00
+G30
+G1 X0       Y70.00    ; Tower C - Z
+G30
+G1 X60.62   Y-35.00   ; Tower B - Y
+G30
+G1 X-60.62  Y-35.00   ; Tower A - X
+G30
+G1 X0       Y0       ; To Center
+G30
+;
 G1 X0       Y0   Z100 ; To Center
+;
