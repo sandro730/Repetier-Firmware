@@ -1,5 +1,8 @@
 Configurazione stampante in data : 29/08/2020
 
+Calibration Site
+http://boim.com/DeltaUtil/CalDoc/Calibration.html
+
 == Default values ==
 
 #define NUMTEMPS_14 46

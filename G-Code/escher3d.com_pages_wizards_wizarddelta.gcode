@@ -1,6 +1,7 @@
 ;
 ; Check height Z at the base of the towers.
 ; See website: : https://escher3d.com/pages/wizards/wizarddelta.php
+; Use Google Sheet : Repetier-Firmware_Function_Calculator
 ;
 G28         ; Home
 ;           ; M320 S<0/1> - Activate auto level, S1 stores it in eeprom

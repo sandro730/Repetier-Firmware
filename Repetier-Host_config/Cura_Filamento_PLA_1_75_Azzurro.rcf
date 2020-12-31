@@ -1,0 +1,10 @@
+[filament]
+name = Cura_Filamento_PLA_1_75_Azzurro
+diameter = 1.74
+multiplierPercent = 100
+printingTemperature = 198
+enableCooling = True
+bedTemperature = 68
+fanSpeedMin = 50
+fanSpeedMax = 100
+minimalLayerTime = 5

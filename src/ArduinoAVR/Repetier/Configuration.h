@@ -879,7 +879,7 @@ leave room for cooling. Overridden if EEPROM activated.
 // This feature exists to protect your hotend from overheating accidentally, but
 // *NOT* from thermistor short/failure!
 // SB #define MAXTEMP 260
-#define MAXTEMP 270
+#define MAXTEMP 280
 
 #define HEATED_BED_PREHEAT_TEMP 55
 
