@@ -12,7 +12,7 @@ http://boim.com/DeltaUtil/CalDoc/Calibration.html
 ```
 #define NUMTEMPS_14 46
 const short temptable_14[NUMTEMPS_14][2] PROGMEM = {
-    {    1 * 4, 8 *  938 },
+	{    1 * 4, 8 *  938 },
 	{   31 * 4, 8 *  314 },
 	{   41 * 4, 8 *  290 },
 	{   51 * 4, 8 *  272 },
