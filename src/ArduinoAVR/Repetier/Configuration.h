@@ -1101,9 +1101,9 @@ on this endstop.
 // For higher precision you can reduce the speed for the second test on the
 // endstop during homing operation. The homing speed is divided by the value. 1
 // = same speed, 2 = half speed
-#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 2
-#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 2
-#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 2
+#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 4
+#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 4
+#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 4
 
 // When you have several endstops in one circuit you need to disable it after
 // homing by moving a small amount back. This is also the case with H-belt
@@ -1910,6 +1910,16 @@ to recalibrate z.
  * increased to that value. */
 #define Z_PROBE_MIN_TEMPERATURE 150
 
+// SB Test 2020/01/03
+// Z-Probe nozle hotend
+// #define Z_PROBE_PIN ORIG_Y_MIN_PIN
+// #define Z_PROBE_ON_HIGH false
+// #define Z_PROBE_X_OFFSET 0
+// #define Z_PROBE_Y_OFFSET 0
+// #define Z_PROBE_BED_DISTANCE 0
+// #define Z_PROBE_HEIGHT       0
+// SB Test 2020/01/03
+
 /*
 Define how we measure the bed rotation.
 All methods need at least 3 points to define the bed rotation correctly. The
@@ -1989,10 +1999,10 @@ motorized bed leveling */
 #define FEATURE_AUTOLEVEL true
 #if BED_LEVELING_METHOD == 0
 #define AUTOLEVEL_R 140
-#define Z_PROBE_X1 -( AUTOLEVEL_R * 0.87 )
-#define Z_PROBE_Y1 -( AUTOLEVEL_R * 0.50 )
-#define Z_PROBE_X2  ( AUTOLEVEL_R * 0.87 )
-#define Z_PROBE_Y2 -( AUTOLEVEL_R * 0.50 )
+#define Z_PROBE_X1 -( AUTOLEVEL_R * 0.866 )
+#define Z_PROBE_Y1 -( AUTOLEVEL_R * 0.50  )
+#define Z_PROBE_X2  ( AUTOLEVEL_R * 0.866 )
+#define Z_PROBE_Y2 -( AUTOLEVEL_R * 0.50  )
 #define Z_PROBE_X3 0
 #define Z_PROBE_Y3 AUTOLEVEL_R
 #else
