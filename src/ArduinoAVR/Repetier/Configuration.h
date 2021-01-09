@@ -323,7 +323,7 @@ always controlled by settings in extruder 0 definition. */
 // 102 is MAX31855
 // 103 is MAX31855 with software SPI, sensor pin is data input!
 // #define EXT0_TEMPSENSOR_TYPE 1
-#define EXT0_TEMPSENSOR_TYPE 14
+#define EXT0_TEMPSENSOR_TYPE 6
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
 // Which pin enables the heater
@@ -699,21 +699,38 @@ increasing and use thermistor types 50-52 instead of 5-7!
 #define NUM_TEMPS_USERTHERMISTOR0 0
 #define USER_THERMISTORTABLE0 \
     { \
-        { 1 * 4, 864 * 8 }, { 21 * 4, 300 * 8 }, { 25 * 4, 290 * 8 }, { 29 * 4, 280 * 8 }, \
-            { 33 * 4, 270 * 8 }, { 39 * 4, 260 * 8 }, { 46 * 4, 250 * 8 }, \
-            { 54 * 4, 240 * 8 }, { 64 * 4, 230 * 8 }, { 75 * 4, 220 * 8 }, \
-            { 90 * 4, 210 * 8 }, { 107 * 4, 200 * 8 }, { 128 * 4, 190 * 8 }, \
-            { 154 * 4, 180 * 8 }, { 184 * 4, 170 * 8 }, { 221 * 4, 160 * 8 }, \
-            { 265 * 4, 150 * 8 }, { 316 * 4, 140 * 8 }, { 375 * 4, 130 * 8 }, \
-            { 441 * 4, 120 * 8 }, { 513 * 4, 110 * 8 }, { 588 * 4, 100 * 8 }, \
-            { 734 * 4, 80 * 8 }, { 856 * 4, 60 * 8 }, { 938 * 4, 40 * 8 }, \
-            { 986 * 4, 20 * 8 }, { 1008 * 4, 0 * 8 }, { \
-            1018 * 4, -20 * 8 \
-        } \
+        {    1 * 4, 864 * 8 }, \
+        {   21 * 4, 300 * 8 }, \
+        {   25 * 4, 290 * 8 }, \
+        {   29 * 4, 280 * 8 }, \
+        {   33 * 4, 270 * 8 }, \
+        {   39 * 4, 260 * 8 }, \
+        {   46 * 4, 250 * 8 }, \
+        {   54 * 4, 240 * 8 }, \
+        {   64 * 4, 230 * 8 }, \
+        {   75 * 4, 220 * 8 }, \
+        {   90 * 4, 210 * 8 }, \
+        {  107 * 4, 200 * 8 }, \
+        {  128 * 4, 190 * 8 }, \
+        {  154 * 4, 180 * 8 }, \
+        {  184 * 4, 170 * 8 }, \
+        {  221 * 4, 160 * 8 }, \
+        {  265 * 4, 150 * 8 }, \
+        {  316 * 4, 140 * 8 }, \
+        {  375 * 4, 130 * 8 }, \
+        {  441 * 4, 120 * 8 }, \
+        {  513 * 4, 110 * 8 }, \
+        {  588 * 4, 100 * 8 }, \
+        {  734 * 4,  80 * 8 }, \
+        {  856 * 4,  60 * 8 }, \
+        {  938 * 4,  40 * 8 }, \
+        {  986 * 4,  20 * 8 }, \
+        { 1008 * 4,   0 * 8 }, \
+        { 1018 * 4, -20 * 8 }  \
     }
 
 /** Number of entries in the user thermistor table 1. Set to 0 to disable it. */
-#define NUM_TEMPS_USERTHERMISTOR1 0
+#define NUM_TEMPS_USERTHERMISTOR1 46
  /** SB : http://www.makeralot.com/download/Reprap-Hotend-Thermistor-NTC-3950-100K.pdf **/
 #define USER_THERMISTORTABLE1 \
     { \
@@ -1150,9 +1167,9 @@ on this endstop.
 // For higher precision you can reduce the speed for the second test on the
 // endstop during homing operation. The homing speed is divided by the value. 1
 // = same speed, 2 = half speed
-#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 6
-#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 6
-#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 6
+#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 10
+#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 10
+#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 10
 
 // When you have several endstops in one circuit you need to disable it after
 // homing by moving a small amount back. This is also the case with H-belt
@@ -1381,11 +1398,11 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 
 /** Home position speed in mm/s. Overridden if EEPROM activated. */
 // SB #define HOMING_FEEDRATE_X 80
-#define HOMING_FEEDRATE_X 80
+#define HOMING_FEEDRATE_X 60
 // SB #define HOMING_FEEDRATE_Y 80
-#define HOMING_FEEDRATE_Y 80
+#define HOMING_FEEDRATE_Y 60
 // SB #define HOMING_FEEDRATE_Z 3
-#define HOMING_FEEDRATE_Z 80
+#define HOMING_FEEDRATE_Z 60
 
 /** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your
  * order. If you measure Z with your extruder tip you need a hot extruder to get
