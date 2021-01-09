@@ -714,8 +714,57 @@ increasing and use thermistor types 50-52 instead of 5-7!
 
 /** Number of entries in the user thermistor table 1. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR1 0
+ /** SB : http://www.makeralot.com/download/Reprap-Hotend-Thermistor-NTC-3950-100K.pdf **/
 #define USER_THERMISTORTABLE1 \
-    {}
+    { \
+        {    1 * 4, 8 *  938 }, \
+        {   22 * 4, 8 *  300 }, \
+        {   26 * 4, 8 *  290 }, \
+        {   34 * 4, 8 *  272 }, \
+        {   42 * 4, 8 *  258 }, \
+        {   50 * 4, 8 *  247 }, \
+        {   59 * 4, 8 *  237 }, \
+        {   68 * 4, 8 *  229 }, \
+        {   78 * 4, 8 *  221 }, \
+        {   87 * 4, 8 *  215 }, \
+        {   97 * 4, 8 *  209 }, \
+        {  106 * 4, 8 *  204 }, \
+        {  115 * 4, 8 *  199 }, \
+        {  123 * 4, 8 *  195 }, \
+        {  136 * 4, 8 *  190 }, \
+        {  143 * 4, 8 *  187 }, \
+        {  154 * 4, 8 *  183 }, \
+        {  167 * 4, 8 *  179 }, \
+        {  176 * 4, 8 *  176 }, \
+        {  197 * 4, 8 *  170 }, \
+        {  216 * 4, 8 *  165 }, \
+        {  237 * 4, 8 *  160 }, \
+        {  258 * 4, 8 *  155 }, \
+        {  280 * 4, 8 *  150 }, \
+        {  311 * 4, 8 *  144 }, \
+        {  339 * 4, 8 *  139 }, \
+        {  375 * 4, 8 *  133 }, \
+        {  406 * 4, 8 *  128 }, \
+        {  439 * 4, 8 *  123 }, \
+        {  481 * 4, 8 *  117 }, \
+        {  524 * 4, 8 *  111 }, \
+        {  567 * 4, 8 *  105 }, \
+        {  602 * 4, 8 *  100 }, \
+        {  675 * 4, 8 *   90 }, \
+        {  710 * 4, 8 *   85 }, \
+        {  813 * 4, 8 *   69 }, \
+        {  835 * 4, 8 *   65 }, \
+        {  884 * 4, 8 *   55 }, \
+        {  901 * 4, 8 *   51 }, \
+        {  943 * 4, 8 *   39 }, \
+        {  971 * 4, 8 *   28 }, \
+        {  981 * 4, 8 *   23 }, \
+        {  991 * 4, 8 *   17 }, \
+        { 1001 * 4, 8 *    9 }, \
+        { 1020 * 4, 8 *  -27 }, \
+        { 1023 * 4, 8 * -200 }  \
+    }
+
 /** Number of entries in the user thermistor table 2. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR2 0
 #define USER_THERMISTORTABLE2 \
@@ -1101,9 +1150,9 @@ on this endstop.
 // For higher precision you can reduce the speed for the second test on the
 // endstop during homing operation. The homing speed is divided by the value. 1
 // = same speed, 2 = half speed
-#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 4
-#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 4
-#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 4
+#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 6
+#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 6
+#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 6
 
 // When you have several endstops in one circuit you need to disable it after
 // homing by moving a small amount back. This is also the case with H-belt
@@ -1332,11 +1381,11 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 
 /** Home position speed in mm/s. Overridden if EEPROM activated. */
 // SB #define HOMING_FEEDRATE_X 80
-#define HOMING_FEEDRATE_X 30
+#define HOMING_FEEDRATE_X 80
 // SB #define HOMING_FEEDRATE_Y 80
-#define HOMING_FEEDRATE_Y 30
+#define HOMING_FEEDRATE_Y 80
 // SB #define HOMING_FEEDRATE_Z 3
-#define HOMING_FEEDRATE_Z 30
+#define HOMING_FEEDRATE_Z 80
 
 /** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your
  * order. If you measure Z with your extruder tip you need a hot extruder to get
