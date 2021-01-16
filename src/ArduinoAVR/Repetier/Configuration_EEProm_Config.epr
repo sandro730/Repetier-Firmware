@@ -15,7 +15,7 @@
 	<epr pos="141" type="3" value="0.000">Z min pos</epr>
 	<epr pos="145" type="3" value="140.000">X max length</epr>
 	<epr pos="149" type="3" value="140.000">Y max length</epr>
-	<epr pos="153" type="3" value="301.985">Z max length</epr>
+	<epr pos="153" type="3" value="301.920">Z max length</epr>
 	<epr pos="1056" type="3" value="0.000">Park position X</epr>
 	<epr pos="1060" type="3" value="70.000">Park position Y</epr>
 	<epr pos="1064" type="3" value="10.000">Park position Z raise</epr>
@@ -69,7 +69,7 @@
 	<epr pos="1004" type="3" value="0.000">Retraction z-lift</epr>
 	<epr pos="1008" type="3" value="0.000">Extra extrusion on undo retract</epr>
 	<epr pos="1016" type="3" value="20.000">Retraction undo speed</epr>
-	<epr pos="200" type="3" value="776.000">Extr.1 steps per mm</epr>
+	<epr pos="200" type="3" value="746.000">Extr.1 steps per mm</epr>
 	<epr pos="204" type="3" value="80.000">Extr.1 max. feedrate</epr>
 	<epr pos="208" type="3" value="10.000">Extr.1 start feedrate</epr>
 	<epr pos="212" type="3" value="500.000">Extr.1 acceleration</epr>

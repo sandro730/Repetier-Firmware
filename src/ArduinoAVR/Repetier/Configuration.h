@@ -2113,18 +2113,18 @@ motorized bed leveling */
 // SB #define DISTORTION_LIMIT_TO 2
 #define DISTORTION_LIMIT_TO 4
 /* For delta printers you simply define the measured radius around origin */
-// SB #define DISTORTION_CORRECTION_R 80
-#define DISTORTION_CORRECTION_R       120
+// SB #define DISTORTION_CORRECTION_R 120 - La coordinata esce dal piano - 09:26:13.076 : Z-probe:30.066 X:-90.00 Y:120.00
+#define DISTORTION_CORRECTION_R       110
 /* For all others you define the correction rectangle by setting the min/max
  * coordinates. Make sure the the probe can reach all points! */
 // SB #define DISTORTION_XMIN 10
-#define DISTORTION_XMIN -120
+#define DISTORTION_XMIN -110
 // SB #define DISTORTION_YMIN 10
-#define DISTORTION_YMIN -120
+#define DISTORTION_YMIN -110
 // SB #define DISTORTION_XMAX 190
-#define DISTORTION_XMAX 120
+#define DISTORTION_XMAX 110
 // SB #define DISTORTION_YMAX 190
-#define DISTORTION_YMAX 120
+#define DISTORTION_YMAX 110
 
 /** Uses EEPROM instead of ram. Allows bigger matrix (up to 22x22) without any
   ram cost. Especially on arm based systems with cached EEPROM it is good, on
