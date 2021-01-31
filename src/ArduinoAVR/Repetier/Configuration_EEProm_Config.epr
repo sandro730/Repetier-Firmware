@@ -2,36 +2,36 @@
 <Repetier-Firmware-EEPROM>
 	<epr pos="1028" type="0" value="254">Language</epr>
 	<epr pos="75" type="2" value="250000">Baudrate</epr>
-	<epr pos="129" type="3" value="24.152">Filament printed</epr>
-	<epr pos="125" type="2" value="25084">Printer active</epr>
+	<epr pos="129" type="3" value="56.231">Filament printed</epr>
+	<epr pos="125" type="2" value="57062">Printer active</epr>
 	<epr pos="79" type="2" value="0">Max. inactive time</epr>
 	<epr pos="83" type="2" value="360000">Stop stepper after inactivity</epr>
 	<epr pos="11" type="3" value="100.0000">Steps per mm</epr>
 	<epr pos="23" type="3" value="200.000">Max. feedrate</epr>
-	<epr pos="35" type="3" value="80.000">Homing feedrate</epr>
-	<epr pos="39" type="3" value="20.000">Max. jerk</epr>
+	<epr pos="35" type="3" value="60.000">Homing feedrate</epr>
+	<epr pos="39" type="3" value="15.446">Max. jerk</epr>
 	<epr pos="133" type="3" value="0.000">X min pos</epr>
 	<epr pos="137" type="3" value="0.000">Y min pos</epr>
 	<epr pos="141" type="3" value="0.000">Z min pos</epr>
 	<epr pos="145" type="3" value="140.000">X max length</epr>
 	<epr pos="149" type="3" value="140.000">Y max length</epr>
-	<epr pos="153" type="3" value="301.920">Z max length</epr>
+	<epr pos="153" type="3" value="305.920">Z max length</epr>
 	<epr pos="1056" type="3" value="0.000">Park position X</epr>
 	<epr pos="1060" type="3" value="70.000">Park position Y</epr>
 	<epr pos="1064" type="3" value="10.000">Park position Z raise</epr>
 	<epr pos="891" type="1" value="70">Segments/s for travel</epr>
-	<epr pos="889" type="1" value="180">Segments/s for printing</epr>
+	<epr pos="889" type="1" value="170">Segments/s for printing</epr>
 	<epr pos="59" type="3" value="1500.000">Acceleration</epr>
 	<epr pos="71" type="3" value="1500.000">Travel acceleration</epr>
-	<epr pos="881" type="3" value="371.980">Diagonal rod length</epr>
-	<epr pos="885" type="3" value="187.500">Horizontal rod radius at 0,0</epr>
+	<epr pos="881" type="3" value="374.085">Diagonal rod length</epr>
+	<epr pos="885" type="3" value="188.265">Horizontal rod radius at 0,0</epr>
 	<epr pos="925" type="3" value="164.000">Max printable radius</epr>
-	<epr pos="893" type="1" value="0">Tower X endstop offset</epr>
-	<epr pos="895" type="1" value="78">Tower Y endstop offset</epr>
-	<epr pos="897" type="1" value="14">Tower Z endstop offset</epr>
+	<epr pos="893" type="1" value="56">Tower X endstop offset</epr>
+	<epr pos="895" type="1" value="52">Tower Y endstop offset</epr>
+	<epr pos="897" type="1" value="0">Tower Z endstop offset</epr>
 	<epr pos="901" type="3" value="210.000">Alpha A(210):</epr>
-	<epr pos="905" type="3" value="330.200">Alpha B(330):</epr>
-	<epr pos="909" type="3" value="89.800">Alpha C(90):</epr>
+	<epr pos="905" type="3" value="330.000">Alpha B(330):</epr>
+	<epr pos="909" type="3" value="90.000">Alpha C(90):</epr>
 	<epr pos="913" type="3" value="0.000">Delta Radius A(0):</epr>
 	<epr pos="917" type="3" value="0.000">Delta Radius B(0):</epr>
 	<epr pos="921" type="3" value="0.000">Delta Radius C(0):</epr>
@@ -39,8 +39,8 @@
 	<epr pos="937" type="3" value="0.000">Corr. diagonal B</epr>
 	<epr pos="941" type="3" value="0.000">Corr. diagonal C</epr>
 	<epr pos="1024" type="3" value="0.000">Coating thickness</epr>
-	<epr pos="808" type="3" value="15.446">Z-probe height</epr>
-	<epr pos="929" type="3" value="14.554">Max. z-probe - bed dist.</epr>
+	<epr pos="808" type="3" value="7.630">Z-probe height</epr>
+	<epr pos="929" type="3" value="20.000">Max. z-probe - bed dist.</epr>
 	<epr pos="812" type="3" value="10.000">Z-probe speed</epr>
 	<epr pos="840" type="3" value="1000.000">Z-probe x-y-speed</epr>
 	<epr pos="800" type="3" value="6.000">Z-probe offset x</epr>

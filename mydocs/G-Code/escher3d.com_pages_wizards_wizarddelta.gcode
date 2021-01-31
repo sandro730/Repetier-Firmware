@@ -10,28 +10,40 @@ M322        ; M322        - Reset auto level matrix
 M323 S0 P1  ; M323 S0/S1  - Enable disable distortion correction P0 = not permanent, P1 = permanent = default
 G33 R0      ; G33 R0      - Resets distortion matrix to 0
 ;
-G1 X0       Y0   Z30  ; To Center
+G1 X0       Y0   Z20  ; To Center
 ;
-G1 X0       Y140      ; Tower C - Z
+; Printable bed radius : 120
+;
+G1 X0       Y120.00   ; Tower C - Z
+G30 P0
 G30
-G1 X121.24  Y70.00
+G1 X103.92  Y60.00
+G30 P0
 G30
-G1 X121.24  Y-70.00   ; Tower B - Y
+G1 X103.92  Y-60.00   ; Tower B - Y
+G30 P0
 G30
-G1 X0       Y-140.00
+G1 X0       Y-120.00
+G30 P0
 G30
-G1 X-121.24 Y-70.00   ; Tower A - X
+G1 X-103.92 Y-60.00   ; Tower A - X
+G30 P0
 G30
-G1 X-121.24 Y70.00
+G1 X-103.92 Y60.00
+G30 P0
 G30
-G1 X0       Y70.00    ; Tower C - Z
+G1 X0       Y60.00    ; Tower C - Z
+G30 P0
 G30
-G1 X60.62   Y-35.00   ; Tower B - Y
+G1 X51.96   Y-30.00   ; Tower B - Y
+G30 P0
 G30
-G1 X-60.62  Y-35.00   ; Tower A - X
+G1 X-51.96  Y-30.00   ; Tower A - X
+G30 P0
 G30
-G1 X0       Y0       ; To Center
+G1 X0       Y0        ; To Center
+G30 P0
 G30
 ;
-G1 X0       Y0   Z100 ; To Center
+G1 X0       Y0   Z20  ; To Center
 ;

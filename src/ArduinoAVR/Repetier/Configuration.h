@@ -1066,7 +1066,7 @@ on this endstop.
 // SB #define MIN_HARDWARE_ENDSTOP_X true
 #define MIN_HARDWARE_ENDSTOP_X false
 // SB #define MIN_HARDWARE_ENDSTOP_Y true
-#define MIN_HARDWARE_ENDSTOP_Y false
+#define MIN_HARDWARE_ENDSTOP_Y true
 #define MIN_HARDWARE_ENDSTOP_Z false
 // SB #define MAX_HARDWARE_ENDSTOP_X false
 #define MAX_HARDWARE_ENDSTOP_X true
@@ -1319,7 +1319,7 @@ on this endstop.
 /** \brief Horizontal offset of the universal joints on the end effector (moving
  * platform).
  */
-#define END_EFFECTOR_HORIZONTAL_OFFSET 0
+#define END_EFFECTOR_HORIZONTAL_OFFSET 30
 
 /** \brief Horizontal offset of the universal joints on the vertical carriages.
  */
@@ -1558,7 +1558,8 @@ Corner can be printed with full speed of 50 mm/s
 
 Overridden if EEPROM activated.
 */
-#define MAX_JERK 20.0
+// SB - #define MAX_JERK 20.0
+#define MAX_JERK 10.0
 #define MAX_ZJERK 0.3
 
 /** \brief Number of moves we can cache in advance.
@@ -1964,8 +1965,9 @@ to recalibrate z.
     2.0                       // Distance to safely switch off probe after it was activated
 // SB #define Z_PROBE_REPETITIONS 5 // Repetitions for probing at one point.
 #define Z_PROBE_REPETITIONS 3
-#define Z_PROBE_USE_MEDIAN \
-    0 // 1 = use middle value, 0 = use average of measurements.
+// SB #define Z_PROBE_USE_MEDIAN  0 // 1 = use middle value, 0 = use average of measurements.
+#define Z_PROBE_USE_MEDIAN  1 // 1 = use middle value, 0 = use average of measurements.
+
 /** Distance between nozzle and bed when probe triggers. */
 // SB #define Z_PROBE_HEIGHT 39.91
 // SB #define Z_PROBE_HEIGHT 10.69
