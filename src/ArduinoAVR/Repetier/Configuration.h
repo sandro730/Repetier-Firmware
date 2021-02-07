@@ -1939,13 +1939,15 @@ to recalibrate z.
 #define Z_PROBE_Y_OFFSET 23.5
 // SB #define Z_PROBE_BED_DISTANCE \
 // SB     5.0 // Higher than max bed level distance error in mm
+// SB #define Z_PROBE_BED_DISTANCE \
+// SB    14.554 // Higher than max bed level distance error in mm
 #define Z_PROBE_BED_DISTANCE \
-    14.554 // Higher than max bed level distance error in mm
+    7.37 // Higher than max bed level distance error in mm
 /* ### SB Note ###
   Il firmware somma questo valore Z_PROBE_BED_DISTANCE con Z_PROBE_HEIGHT
   per stabilire la quota in Z da cui partire per sondare.
-  Ho inserito il valore 14.554 per avere una quota di sondaggio pari a 30.
-  Z_PROBE_BED_DISTANCE = 30 - Z_PROBE_HEIGHT
+  Ho inserito il valore 7.37 per avere una quota di sondaggio pari a 15.
+  Z_PROBE_BED_DISTANCE = 15 - Z_PROBE_HEIGHT
 */
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
@@ -1971,11 +1973,13 @@ to recalibrate z.
 /** Distance between nozzle and bed when probe triggers. */
 // SB #define Z_PROBE_HEIGHT 39.91
 // SB #define Z_PROBE_HEIGHT 10.69
-#define Z_PROBE_HEIGHT 15.446
+// SB #define Z_PROBE_HEIGHT 15.446
+#define Z_PROBE_HEIGHT 7.630
 /** These scripts are run before resp. after the z-probe is done. Add here code
  * to activate/deactivate probe if needed. */
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
+// SB - #define Z_PROBE_FINISHED_SCRIPT "G1 X60 Y118 Z50 F8000\n\rG1 X60 Y118 Z7 F600\n\rG1 X60 Y118 Z50 F8000\n\rG1 X0 Y0 Z50 F8000"
 /** Set 1 if you need a hot extruder for good probe results. Normally only
  * required if nozzle is probe. */
 #define Z_PROBE_REQUIRES_HEATING 0
