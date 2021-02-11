@@ -19,32 +19,34 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER
 uint8_t Com::selectedLanguage;
 #endif
 
 #ifndef MACHINE_TYPE
-#if DRIVE_SYSTEM == DELTA
-#define MACHINE_TYPE "Delta"
-#elif DRIVE_SYSTEM == CARTESIAN
-#define MACHINE_TYPE "Mendel"
-#else
-#define MACHINE_TYPE "Core_XY"
-#endif
+#define MACHINE_TYPE "Unknown"
 #endif
 #ifndef FIRMWARE_URL
 #define FIRMWARE_URL "https://github.com/repetier/Repetier-Firmware/"
 #endif // FIRMWARE_URL
+#define FIRMWARE_INFO_STRING "FIRMWARE_NAME:Repetier_" REPETIER_VERSION " COMPILED:" __DATE__ " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:4"
 
-FSTRINGVALUE(Com::tFirmware, "FIRMWARE_NAME:Repetier_" REPETIER_VERSION " COMPILED:" __DATE__ " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
+// FSTRINGVALUE(Com::tFirmware, "FIRMWARE_NAME:Repetier_" REPETIER_VERSION " COMPILED:" __DATE__ " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:4")
+FSTRINGVALUE(Com::tFirmware, FIRMWARE_INFO_STRING)
+FSTRINGVALUE(Com::tEmpty, "")
+FSTRINGVALUE(Com::tFirmwareVersion, REPETIER_VERSION)
+FSTRINGVALUE(Com::tFirmwareCompiled, "Compiled:" __DATE__)
+FSTRINGVALUE(Com::tVendor, UI_PRINTER_COMPANY)
+FSTRINGVALUE(Com::tPrinterName, UI_PRINTER_NAME)
 FSTRINGVALUE(Com::tDebug, "Debug:")
 FSTRINGVALUE(Com::tOk, "ok")
 FSTRINGVALUE(Com::tNewline, "\r\n")
 FSTRINGVALUE(Com::tNAN, "NAN")
 FSTRINGVALUE(Com::tINF, "INF")
 FSTRINGVALUE(Com::tError, "Error:")
+FSTRINGVALUE(Com::tLog, "Log:")
 FSTRINGVALUE(Com::tInfo, "Info:")
 FSTRINGVALUE(Com::tWarning, "Warning:")
 FSTRINGVALUE(Com::tResend, "Resend:")
@@ -62,6 +64,13 @@ FSTRINGVALUE(Com::tEAxis, "E axis")
 FSTRINGVALUE(Com::tAAxis, "A axis")
 FSTRINGVALUE(Com::tBAxis, "B axis")
 FSTRINGVALUE(Com::tCAxis, "C axis")
+FSTRINGVALUE(Com::tXLetter, "X")
+FSTRINGVALUE(Com::tYLetter, "Y")
+FSTRINGVALUE(Com::tZLetter, "Z")
+FSTRINGVALUE(Com::tELetter, "E")
+FSTRINGVALUE(Com::tALetter, "A")
+FSTRINGVALUE(Com::tBLetter, "B")
+FSTRINGVALUE(Com::tCLetter, "C")
 FSTRINGVALUE(Com::tX, " X")
 FSTRINGVALUE(Com::tY, " Y")
 FSTRINGVALUE(Com::tZ, " Z")
@@ -80,7 +89,9 @@ FSTRINGVALUE(Com::tB, " B")
 FSTRINGVALUE(Com::tK, " K")
 FSTRINGVALUE(Com::tL, " L")
 FSTRINGVALUE(Com::tO, " O")
-FSTRINGVALUE(Com::tSDReadError, "SD read error")
+FSTRINGVALUE(Com::tU, " U")
+FSTRINGVALUE(Com::tV, " V")
+FSTRINGVALUE(Com::tW, " W")
 FSTRINGVALUE(Com::tExpectedLine, "Error:expected line ")
 FSTRINGVALUE(Com::tGot, " got ")
 FSTRINGVALUE(Com::tSkip, "skip ")
@@ -98,6 +109,8 @@ FSTRINGVALUE(Com::tSpaceXColon, " X:")
 FSTRINGVALUE(Com::tSpaceYColon, " Y:")
 FSTRINGVALUE(Com::tSpaceZColon, " Z:")
 FSTRINGVALUE(Com::tSpaceEColon, " E:")
+FSTRINGVALUE(Com::tSpaceAColon, " A:")
+FSTRINGVALUE(Com::tSpaceCColon, " C:")
 FSTRINGVALUE(Com::tTColon, "T:")
 FSTRINGVALUE(Com::tSpaceBColon, " B:")
 FSTRINGVALUE(Com::tSpaceAtColon, " @:")
@@ -110,6 +123,33 @@ FSTRINGVALUE(Com::tSlash, "/")
 FSTRINGVALUE(Com::tSpaceSlash, " /")
 FSTRINGVALUE(Com::tFatal, "fatal:")
 FSTRINGVALUE(Com::tDoorOpen, "Door open")
+FSTRINGVALUE(Com::tBtnOK, " OK ")
+FSTRINGVALUE(Com::tUnitMM, "mm")
+FSTRINGVALUE(Com::tUnitMMPS, "mm/s")
+FSTRINGVALUE(Com::tUnitMMPS2, "mm/s^2")
+FSTRINGVALUE(Com::tUnitMMPS3, "mm/s^3")
+FSTRINGVALUE(Com::tUnitBaud, "baud")
+FSTRINGVALUE(Com::tUnitPercent, "%")
+FSTRINGVALUE(Com::tUnitDegCelsius, "°C")
+FSTRINGVALUE(Com::tUnitStepsPerMM, "steps/mm")
+FSTRINGVALUE(Com::tUnitSteps, "steps")
+FSTRINGVALUE(Com::tUnitSeconds, "s")
+FSTRINGVALUE(Com::tUnitMilliSeconds, "ms")
+FSTRINGVALUE(Com::tUnitMilliWatt, "mW")
+FSTRINGVALUE(Com::tUnitMilliamps, "mA")
+FSTRINGVALUE(Com::tUnitPWM, "0-255")
+FSTRINGVALUE(Com::tUnitRPM, "1/min")
+FSTRINGVALUE(Com::tMatPLA, "PLA ")
+FSTRINGVALUE(Com::tMatPET, "PET ")
+FSTRINGVALUE(Com::tMatASA, "ASA ")
+FSTRINGVALUE(Com::tMatPC, "PC  ")
+FSTRINGVALUE(Com::tMatABS, "ABS ")
+FSTRINGVALUE(Com::tMatHIPS, "HIPS")
+FSTRINGVALUE(Com::tMatPP, "PP  ")
+FSTRINGVALUE(Com::tMatFLEX, "FLEX")
+FSTRINGVALUE(Com::tM999, "Fail mode active. Send M999 to disable failed mode!")
+FSTRINGVALUE(Com::tTestM999, "Testing fatal error")
+FSTRINGVALUE(Com::tColdExtrusionPrevented, "Cold extrusion prevented")
 #if JSON_OUTPUT
 FSTRINGVALUE(Com::tJSONDir, "{\"dir\":\"")
 FSTRINGVALUE(Com::tJSONFiles, "\",\"files\":[")
@@ -151,6 +191,12 @@ FSTRINGVALUE(Com::tYMinColon, "y_min:")
 FSTRINGVALUE(Com::tYMaxColon, "y_max:")
 FSTRINGVALUE(Com::tZMinColon, "z_min:")
 FSTRINGVALUE(Com::tZMaxColon, "z_max:")
+FSTRINGVALUE(Com::tAMinColon, "a_min:")
+FSTRINGVALUE(Com::tAMaxColon, "a_max:")
+FSTRINGVALUE(Com::tBMinColon, "b_min:")
+FSTRINGVALUE(Com::tBMaxColon, "b_max:")
+FSTRINGVALUE(Com::tCMinColon, "c_min:")
+FSTRINGVALUE(Com::tCMaxColon, "c_max:")
 FSTRINGVALUE(Com::tZ2MinMaxColon, "z2_minmax:")
 FSTRINGVALUE(Com::tJerkColon, "Jerk:")
 FSTRINGVALUE(Com::tZJerkColon, " ZJerk:")
@@ -164,7 +210,6 @@ FSTRINGVALUE(Com::tQuadraticKColon, " quadratic K:")
 FSTRINGVALUE(Com::tFilamentSlipping, "Filament slipping")
 FSTRINGVALUE(Com::tPauseCommunication, "// action:pause")
 FSTRINGVALUE(Com::tContinueCommunication, "// action:resume")
-#if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tMeasurementReset, "Measurement reset.")
 FSTRINGVALUE(Com::tMeasureDeltaSteps, "Measure/delta (Steps) =")
 FSTRINGVALUE(Com::tMeasureDelta, "Measure/delta =")
@@ -180,23 +225,9 @@ FSTRINGVALUE(Com::tDeltaAlphaC, "Alpha C(90):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionA, "Delta Radius A(0):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionB, "Delta Radius B(0):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionC, "Delta Radius C(0):")
-#endif // DRIVE_SYSTEM
-#if NONLINEAR_SYSTEM
-#if DRIVE_SYSTEM == TUGA
-FSTRINGVALUE(Com::tInvalidDeltaCoordinate, "Invalid coordinate - move ignored")
-FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment, "No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
-#elif DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tInvalidDeltaCoordinate, "Invalid delta coordinate - move ignored")
 FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment, "No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
-#else
-FSTRINGVALUE(Com::tInvalidDeltaCoordinate, "Invalid coordinate - move ignored")
-FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment, "No move in segment with > 1 segment. This should never happen and may cause a problem!")
-#endif
-#endif
 
-#if DRIVE_SYSTEM == TUGA
-FSTRINGVALUE(Com::tEPRDiagonalRodLength, "Long arm length [mm]")
-#endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC
 FSTRINGVALUE(Com::tGenTemp, "GenTemp:")
 #endif // DEBUG_GENERICFSTRINGVALUE(Com::,"")
@@ -213,7 +244,7 @@ FSTRINGVALUE(Com::tAPIDClassic, " Classic PID")
 FSTRINGVALUE(Com::tAPIDSome, " Some Overshoot PID")
 FSTRINGVALUE(Com::tAPIDNone, " No Overshoot PID")
 FSTRINGVALUE(Com::tAPIDPessen, " Pessen Integral Rule PID")
-FSTRINGVALUE(Com::tAPIDTyreusLyben," Tyreus-Lyben PID")
+FSTRINGVALUE(Com::tAPIDTyreusLyben, " Tyreus-Lyben PID")
 FSTRINGVALUE(Com::tAPIDKp, " Kp: ")
 FSTRINGVALUE(Com::tAPIDKi, " Ki: ")
 FSTRINGVALUE(Com::tAPIDKd, " Kd: ")
@@ -263,47 +294,30 @@ FSTRINGVALUE(Com::tDBGDeltaVirtualAxisSteps, "Virtual axis steps:")
 #ifdef DEBUG_STEPCOUNT
 FSTRINGVALUE(Com::tDBGMissedSteps, "Missed steps:")
 #endif // DEBUG_STEPCOUNT
-#if FEATURE_Z_PROBE
+FSTRINGVALUE(Com::tProbing, "Probing")
 FSTRINGVALUE(Com::tZProbe, "Z-probe:")
 FSTRINGVALUE(Com::tZProbeAverage, "Z-probe average height:")
 FSTRINGVALUE(Com::tZProbeZReset, "Reset Z height")
 FSTRINGVALUE(Com::tZProbeStartScript, Z_PROBE_START_SCRIPT)
 FSTRINGVALUE(Com::tZProbeEndScript, Z_PROBE_FINISHED_SCRIPT)
 FSTRINGVALUE(Com::tHitZProbe, "Hit z-probe")
-#endif
 FSTRINGVALUE(Com::tZProbeState, "Z-probe state:")
 FSTRINGVALUE(Com::tAutolevelReset, "Autolevel matrix reset")
 FSTRINGVALUE(Com::tAutolevelEnabled, "Autoleveling enabled")
 FSTRINGVALUE(Com::tAutolevelDisabled, "Autoleveling disabled")
+FSTRINGVALUE(Com::tBumpCSVHeader, "Repetier V2 Bump-Matrix File")
+FSTRINGVALUE(Com::tErrorImportBump, "Error importing bump matrix:")
+FSTRINGVALUE(Com::tErrorExportBump, "Error exporting bump matrix:")
+FSTRINGVALUE(Com::tNoGridLeveling, "Not compiled with grid-based leveling.")
+FSTRINGVALUE(Com::tNoDistortionData, "No distortion matrix data stored!")
 FSTRINGVALUE(Com::tTransformationMatrix, "Transformation matrix:")
 FSTRINGVALUE(Com::tZProbeFailed, "Z-probe failed")
 FSTRINGVALUE(Com::tZProbeMax, "Z-probe max:")
 FSTRINGVALUE(Com::tZProbePrinterHeight, "Printer height:")
 //FSTRINGVALUE(Com::,"")
-#ifdef WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tWait, WAITING_IDENTIFIER)
-#endif // WAITING_IDENTIFIER
-#if EEPROM_MODE == 0
 FSTRINGVALUE(Com::tNoEEPROMSupport, "No EEPROM support compiled.\r\n")
-#else
 FSTRINGVALUE(Com::tZProbeOffsetZ, "Coating thickness [mm]")
-#if FEATURE_Z_PROBE
-FSTRINGVALUE(Com::tZProbeHeight, "Z-probe height [mm]")
-FSTRINGVALUE(Com::tZProbeBedDitance, "Max. z-probe - bed dist. [mm]")
-FSTRINGVALUE(Com::tZProbeOffsetX, "Z-probe offset x [mm]")
-FSTRINGVALUE(Com::tZProbeOffsetY, "Z-probe offset y [mm]")
-FSTRINGVALUE(Com::tZProbeSpeed, "Z-probe speed [mm/s]")
-FSTRINGVALUE(Com::tZProbeSpeedXY, "Z-probe x-y-speed [mm/s]")
-FSTRINGVALUE(Com::tZProbeX1, "Z-probe X1 [mm]")
-FSTRINGVALUE(Com::tZProbeY1, "Z-probe Y1 [mm]")
-FSTRINGVALUE(Com::tZProbeX2, "Z-probe X2 [mm]")
-FSTRINGVALUE(Com::tZProbeY2, "Z-probe Y2 [mm]")
-FSTRINGVALUE(Com::tZProbeX3, "Z-probe X3 [mm]")
-FSTRINGVALUE(Com::tZProbeY3, "Z-probe Y3 [mm]")
-FSTRINGVALUE(Com::zZProbeBendingCorA, "Z-probe bending correction A [mm]")
-FSTRINGVALUE(Com::zZProbeBendingCorB, "Z-probe bending correction B [mm]")
-FSTRINGVALUE(Com::zZProbeBendingCorC, "Z-probe bending correction C [mm]")
-#endif
 #if FEATURE_AXISCOMP
 FSTRINGVALUE(Com::tAxisCompTanXY, "tanXY Axis Compensation")
 FSTRINGVALUE(Com::tAxisCompTanYZ, "tanYZ Axis Compensation")
@@ -318,7 +332,7 @@ FSTRINGVALUE(Com::tEPR0, "EPR:0 ")
 FSTRINGVALUE(Com::tEPR1, "EPR:1 ")
 FSTRINGVALUE(Com::tEPR2, "EPR:2 ")
 FSTRINGVALUE(Com::tEPR3, "EPR:3 ")
-FSTRINGVALUE(Com::tEPRBaudrate, "Baudrate")
+FSTRINGVALUE(Com::tEPRBaudrate, "Baudrate [baud]")
 FSTRINGVALUE(Com::tLanguage, "Language")
 FSTRINGVALUE(Com::tEPRFilamentPrinted, "Filament printed [m]")
 FSTRINGVALUE(Com::tEPRPrinterActive, "Printer active [s]")
@@ -335,12 +349,11 @@ FSTRINGVALUE(Com::tEPRYBacklash, "Y backlash [mm]")
 FSTRINGVALUE(Com::tEPRZBacklash, "Z backlash [mm]")
 FSTRINGVALUE(Com::tEPRMaxJerk, "Max. jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRAccelerationFactorAtTop, "Acceleration factor at top [%,100=like bottom]")
-#if DRIVE_SYSTEM == DELTA
-FSTRINGVALUE(Com::tEPRZAcceleration, "Acceleration [mm/s^2]")
-FSTRINGVALUE(Com::tEPRZTravelAcceleration, "Travel acceleration [mm/s^2]")
-FSTRINGVALUE(Com::tEPRZStepsPerMM, "Steps per mm")
-FSTRINGVALUE(Com::tEPRZMaxFeedrate, "Max. feedrate [mm/s]")
-FSTRINGVALUE(Com::tEPRZHomingFeedrate, "Homing feedrate [mm/s]")
+// FSTRINGVALUE(Com::tEPRZAcceleration, "Acceleration [mm/s^2]")
+// FSTRINGVALUE(Com::tEPRZTravelAcceleration, "Travel acceleration [mm/s^2]")
+// FSTRINGVALUE(Com::tEPRZStepsPerMM, "Steps per mm")
+// FSTRINGVALUE(Com::tEPRZMaxFeedrate, "Max. feedrate [mm/s]")
+// FSTRINGVALUE(Com::tEPRZHomingFeedrate, "Homing feedrate [mm/s]")
 
 FSTRINGVALUE(Com::tEPRDiagonalRodLength, "Diagonal rod length [mm]")
 FSTRINGVALUE(Com::tEPRHorizontalRadius, "Horizontal rod radius at 0,0 [mm]")
@@ -354,7 +367,6 @@ FSTRINGVALUE(Com::tDeltaDiagonalCorrectionA, "Corr. diagonal A [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionB, "Corr. diagonal B [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionC, "Corr. diagonal C [mm]")
 
-#else
 FSTRINGVALUE(Com::tEPRMaxZJerk, "Max. Z-jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRXStepsPerMM, "X-axis steps per mm")
 FSTRINGVALUE(Com::tEPRYStepsPerMM, "Y-axis steps per mm")
@@ -371,7 +383,6 @@ FSTRINGVALUE(Com::tEPRZAcceleration, "Z-axis acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRXTravelAcceleration, "X-axis travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRYTravelAcceleration, "Y-axis travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration, "Z-axis travel acceleration [mm/s^2]")
-#endif
 FSTRINGVALUE(Com::tEPROPSMode, "OPS operation mode [0=Off,1=Classic,2=Fast]")
 FSTRINGVALUE(Com::tEPROPSMoveAfter, "OPS move after x% retract [%]")
 FSTRINGVALUE(Com::tEPROPSMinDistance, "OPS min. distance for fil. retraction [mm]")
@@ -384,7 +395,7 @@ FSTRINGVALUE(Com::tEPRBedPGain, "Bed PID P-gain")
 FSTRINGVALUE(Com::tEPRBedIGain, "Bed PID I-gain")
 FSTRINGVALUE(Com::tEPRBedDGain, "Bed PID D-gain")
 FSTRINGVALUE(Com::tEPRBedPISMaxValue, "Bed PID max value [0-255]")
-FSTRINGVALUE(Com::tEPRStepsPerMM, "steps per mm")
+FSTRINGVALUE(Com::tEPRStepsPerMM, "steps per mm [steps/mm]")
 FSTRINGVALUE(Com::tEPRMaxFeedrate, "max. feedrate [mm/s]")
 FSTRINGVALUE(Com::tEPRStartFeedrate, "start feedrate [mm/s]")
 FSTRINGVALUE(Com::tEPRAcceleration, "acceleration [mm/s^2]")
@@ -408,21 +419,27 @@ FSTRINGVALUE(Com::tEPRAdvanceK, "advance K [0=off]")
 FSTRINGVALUE(Com::tEPRAdvanceL, "advance L [0=off]")
 FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [�C]")
 FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [�C]")
-
+#if NUM_BEEPERS > 0
+FSTRINGVALUE(Com::tEPRToneVolume, "Tone volume [%]")
 #endif
-#if SDSUPPORT
 //FSTRINGVALUE(Com::tSDRemoved,UI_TEXT_SD_REMOVED)
 //FSTRINGVALUE(Com::tSDInserted,UI_TEXT_SD_INSERTED)
 FSTRINGVALUE(Com::tSDInitFail, "SD init fail")
-FSTRINGVALUE(Com::tErrorWritingToFile, "error writing to file")
+FSTRINGVALUE(Com::tSDReadError, "SD read error")
+FSTRINGVALUE(Com::tErrorWritingToFile, "Error writing to file")
 FSTRINGVALUE(Com::tBeginFileList, "Begin file list")
 FSTRINGVALUE(Com::tEndFileList, "End file list")
 FSTRINGVALUE(Com::tFileOpened, "File opened:")
 FSTRINGVALUE(Com::tSpaceSizeColon, " Size:")
 FSTRINGVALUE(Com::tFileSelected, "File selected")
-FSTRINGVALUE(Com::tFileOpenFailed, "file.open failed")
+FSTRINGVALUE(Com::tFileOpenFailed, "File open failed")
+FSTRINGVALUE(Com::tInvalidFiletype, "Invalid file type")
+FSTRINGVALUE(Com::tInvalidFilename, "Invalid file name")
+FSTRINGVALUE(Com::tNoMountedCard, "No SD card mounted")
 FSTRINGVALUE(Com::tSDPrintingByte, "SD printing byte ")
+FSTRINGVALUE(Com::tSDPrintingPaused, "SD printing paused")
 FSTRINGVALUE(Com::tNotSDPrinting, "Not SD printing")
+FSTRINGVALUE(Com::tCurrentOpenFile, "Current file: ") // Compat with hosts that use M27 C
 FSTRINGVALUE(Com::tOpenFailedFile, "open failed, File: ")
 FSTRINGVALUE(Com::tWritingToFile, "Writing to file: ")
 FSTRINGVALUE(Com::tDoneSavingFile, "Done saving file.")
@@ -431,36 +448,80 @@ FSTRINGVALUE(Com::tDeletionFailed, "Deletion failed")
 FSTRINGVALUE(Com::tDirectoryCreated, "Directory created")
 FSTRINGVALUE(Com::tCreationFailed, "Creation failed")
 FSTRINGVALUE(Com::tSDErrorCode, "SD errorCode:")
-#endif // SDSUPPORT
 FSTRINGVALUE(Com::tHeaterDecoupled, "Heater decoupled")
 FSTRINGVALUE(Com::tHeaterDecoupledWarning, "One heater seems decoupled from thermistor - disabling all for safety!")
-#if DISTORTION_CORRECTION
-FSTRINGVALUE(Com::tZCorrectionEnabled, "Z correction enabled")
-FSTRINGVALUE(Com::tZCorrectionDisabled, "Z correction disabled")
-#endif
 #if FEATURE_RETRACTION
 FSTRINGVALUE(Com::tEPRAutoretractEnabled, "Enable retraction conversion [0/1]")
 FSTRINGVALUE(Com::tEPRRetractionLength, "Retraction length [mm]")
-FSTRINGVALUE(Com::tEPRRetractionLongLength, "Retraction length extruder switch [mm]")
 FSTRINGVALUE(Com::tEPRRetractionSpeed, "Retraction speed [mm/s]")
 FSTRINGVALUE(Com::tEPRRetractionZLift, "Retraction z-lift [mm]")
 FSTRINGVALUE(Com::tEPRRetractionUndoExtraLength, "Extra extrusion on undo retract [mm]")
+FSTRINGVALUE(Com::tEPRRetractionLongLength, "Retraction length extruder switch [mm]")
 FSTRINGVALUE(Com::tEPRRetractionUndoExtraLongLength, "Extra extrusion on undo switch retract [mm]")
-FSTRINGVALUE(Com::tEPRRetractionUndoSpeed, "Retraction undo speed")
+FSTRINGVALUE(Com::tEPRRetractionUndoSpeed, "Retraction undo speed [mm/s]")
 #endif
 FSTRINGVALUE(Com::tConfig, "Config:")
 FSTRINGVALUE(Com::tExtrDot, "Extr.")
 
-#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
-FSTRINGVALUE(Com::tMCPEpromSettings, "MCP4728 DAC EEPROM Settings:")
-FSTRINGVALUE(Com::tMCPCurrentSettings, "MCP4728 DAC Current Settings:")
-#endif
 FSTRINGVALUE(Com::tPrinterModeFFF, "PrinterMode:FFF")
 FSTRINGVALUE(Com::tPrinterModeLaser, "PrinterMode:Laser")
 FSTRINGVALUE(Com::tPrinterModeCNC, "PrinterMode:CNC")
 #ifdef STARTUP_GCODE
 FSTRINGVALUE(Com::tStartupGCode, STARTUP_GCODE)
 #endif
+FSTRINGVALUE(Com::tI2CError, "I2C communication error occured")
+FSTRINGVALUE(Com::tColonSpace, ": ")
+FSTRINGVALUE(Com::tMotorMotorSpace, "Motor ")
+FSTRINGVALUE(Com::tMotorResolutionColon, "Resolution:")
+FSTRINGVALUE(Com::tMotorResolutionSteps, "Resolution [steps/mm]")
+FSTRINGVALUE(Com::tMotorMicrosteps, "Microsteps")
+FSTRINGVALUE(Com::tMotorRMSCurrentMA, "RMS Current [mA]")
+FSTRINGVALUE(Com::tMotorRMSCurrentMAColon, "RMS Current [mA]:")
+FSTRINGVALUE(Com::tMotorCurrentColon, "Motor Current:")
+FSTRINGVALUE(Com::tMotorHybridTresholdMMS, "Hybrid Treshold [mm/s]")
+FSTRINGVALUE(Com::tMotorStealthOnOff, "Stealth [0/1]")
+FSTRINGVALUE(Com::tMotorStallSensitivity255, "Stall Sensitivity [0..255]")
+FSTRINGVALUE(Com::tMotorStallSensitivity64, "Stall Sensitivity [-64..63]")
+FSTRINGVALUE(Com::tMotorStatusColon, "Status: ")
+FSTRINGVALUE(Com::tMotorNoConnection, "No connection")
+FSTRINGVALUE(Com::tMotorNoPower, "No power")
+FSTRINGVALUE(Com::tMotorEnabledColon, "Enabled: ")
+FSTRINGVALUE(Com::tMotorSpaceSetColonSpace, " set: ")
+FSTRINGVALUE(Com::tMotorMaxCurrentMA, "Max. current [mA]: ")
+FSTRINGVALUE(Com::tMotorMicrostepsColon, "Microsteps: ")
+FSTRINGVALUE(Com::tMotorSpaceMresColon, " mres: ")
+FSTRINGVALUE(Com::tMotorStealthChopColon, "StealthChop: ")
+FSTRINGVALUE(Com::tMotorHybridTresholdMMSColon, "Hybrid treshold [mm/s]: ")
+FSTRINGVALUE(Com::tMotorHybridModeDisabled, "Hybrid mode disabled")
+FSTRINGVALUE(Com::tMotorStallguardSensitivityColon, "Stallguard sensitivity: ")
+FSTRINGVALUE(Com::tMotorTStep, "TSTEP: ")
+FSTRINGVALUE(Com::tMax, "max")
+FSTRINGVALUE(Com::tMotorTPWMTHRS, "TPWMTHRS: ")
+FSTRINGVALUE(Com::tMotorTPOWERDOWN, "TPOWERDOWN: ")
+FSTRINGVALUE(Com::tMotorIRUN, "IRUN: ")
+FSTRINGVALUE(Com::tMotorSlash31, "/31")
+FSTRINGVALUE(Com::tMotorIHOLD, "IHOLD: ")
+FSTRINGVALUE(Com::tMotorCSActual, "CS Actual: ")
+FSTRINGVALUE(Com::tMotorVSense, "vsense: ")
+FSTRINGVALUE(Com::tMotorTOff, "toff: ")
+FSTRINGVALUE(Com::tMotorHStart, "hstart: ")
+FSTRINGVALUE(Com::tMotorHEnd, "hend: ")
+FSTRINGVALUE(Com::tMotorBlankTime, "Blank time: ")
+FSTRINGVALUE(Com::tMotorTBLColon, " tbl: ")
+FSTRINGVALUE(Com::tMotorIOIN, "IOIN: ")
+FSTRINGVALUE(Com::tMotorGSTAT, "GSTAT: ")
+FSTRINGVALUE(Com::tMotorDriverShort, " driver short circuit ")
+FSTRINGVALUE(Com::tMotorDriverOvertempCurrent, " driver overtemperature! Current: ")
+FSTRINGVALUE(Com::tMotorDriverOvertempWarningCurrent, " driver overtemperature warning! Current: ")
+FSTRINGVALUE(Com::tMotorCurrentDecreasedTo, " current decreased to ")
+FSTRINGVALUE(Com::tMotorSpaceStealthChopColon, " stealthChop: ")
+FSTRINGVALUE(Com::tMotorTempPrewarnTriggered, " temperature prewarn triggered: ")
+FSTRINGVALUE(Com::tMotorPrewarnFlagCleared, " prewarn flag cleared")
+FSTRINGVALUE(Com::tMotorSpaceHybridTresholdColor, " hybrid treshold: ")
+FSTRINGVALUE(Com::tMotorSpaceStallguardSensitivityColon, " stallguard sensitivity: ")
+FSTRINGVALUE(Com::tMotorStallguardResult, "StallGuard Result: ")
+FSTRINGVALUE(Com::tMotorSpaceRMSCurrentMAColon, " RMS Current [mA]: ")
+FSTRINGVALUE(Com::tHomingFailed, "Homing failed!")
 
 bool Com::writeToAll = true; // transmit start messages to all devices!
 
@@ -468,44 +529,54 @@ void Com::cap(FSTRINGPARAM(text)) {
     printF(tCap);
     printFLN(text);
 }
+
 void Com::config(FSTRINGPARAM(text)) {
     printF(tConfig);
     printFLN(text);
 }
+
 void Com::config(FSTRINGPARAM(text), int value) {
     printF(tConfig);
     printFLN(text, value);
 }
+
 void Com::config(FSTRINGPARAM(text), const char* msg) {
     printF(tConfig);
     printF(text);
     print(msg);
     println();
 }
+
 void Com::config(FSTRINGPARAM(text), int32_t value) {
     printF(tConfig);
     printFLN(text, value);
 }
+
 void Com::config(FSTRINGPARAM(text), uint32_t value) {
     printF(tConfig);
     printFLN(text, value);
 }
+
 void Com::config(FSTRINGPARAM(text), float value, uint8_t digits) {
     printF(tConfig);
     printFLN(text, value, digits);
 }
+
 void Com::printWarningF(FSTRINGPARAM(text)) {
     printF(tWarning);
     printF(text);
 }
+
 void Com::printWarningFLN(FSTRINGPARAM(text)) {
     printF(tWarning);
     printFLN(text);
 }
+
 void Com::printInfoF(FSTRINGPARAM(text)) {
     printF(tInfo);
     printF(text);
 }
+
 void Com::printInfoFLN(FSTRINGPARAM(text)) {
     printF(tInfo);
     printFLN(text);
@@ -515,14 +586,27 @@ void Com::printErrorF(FSTRINGPARAM(text)) {
     printF(tError);
     printF(text);
 }
+
 void Com::printErrorFLN(FSTRINGPARAM(text)) {
     printF(tError);
     printFLN(text);
 }
+
+void Com::printLogFLN(FSTRINGPARAM(text)) {
+    printF(tLog);
+    printFLN(text);
+}
+
+void Com::printLogF(FSTRINGPARAM(text)) {
+    printF(tLog);
+    printF(text);
+}
+
 void Com::printFLN(FSTRINGPARAM(text)) {
     printF(text);
     println();
 }
+
 void Com::printFLN(FSTRINGPARAM(text), const char* msg) {
     printF(text);
     print(msg);
@@ -531,46 +615,66 @@ void Com::printFLN(FSTRINGPARAM(text), const char* msg) {
 
 void Com::printF(FSTRINGPARAM(ptr)) {
     char c;
-    while ((c = HAL::readFlashByte(ptr++)) != 0)
+    while ((c = HAL::readFlashByte(ptr++)) != 0) {
         GCodeSource::writeToAll(c);
+    }
 }
+
 void Com::printF(FSTRINGPARAM(text), const char* msg) {
     printF(text);
     print(msg);
+}
+
+void Com::printF(FSTRINGPARAM(text), bool value, BoolFormat format) {
+    printF(text);
+    print(value, format);
 }
 
 void Com::printF(FSTRINGPARAM(text), int value) {
     printF(text);
     print(value);
 }
+
 void Com::printF(FSTRINGPARAM(text), int32_t value) {
     printF(text);
     print(value);
 }
+
 void Com::printF(FSTRINGPARAM(text), uint32_t value) {
     printF(text);
     printNumber(value);
 }
+
 void Com::printFLN(FSTRINGPARAM(text), int value) {
     printF(text);
     print(value);
     println();
 }
+
 void Com::printFLN(FSTRINGPARAM(text), int32_t value) {
     printF(text);
     print(value);
     println();
 }
+
 void Com::printFLN(FSTRINGPARAM(text), uint32_t value) {
     printF(text);
     printNumber(value);
     println();
 }
+
+void Com::printFLN(FSTRINGPARAM(text), bool value, BoolFormat format) {
+    printF(text);
+    print(value, format);
+    println();
+}
+
 void Com::printFLN(FSTRINGPARAM(text), float value, uint8_t digits) {
     printF(text);
     printFloat(value, digits);
     println();
 }
+
 void Com::printF(FSTRINGPARAM(text), float value, uint8_t digits) {
     printF(text);
     printFloat(value, digits);
@@ -588,7 +692,31 @@ void Com::print(long value) {
     }
     printNumber(value);
 }
-
+void Com::print(bool value, BoolFormat format) {
+    switch (format) {
+    case BoolFormat::TRUEFALSE:
+        if (value) {
+            printF(PSTR("True"));
+        } else {
+            printF(PSTR("False"));
+        }
+        break;
+    case BoolFormat::YESNO:
+        if (value) {
+            printF(PSTR("Yes"));
+        } else {
+            printF(PSTR("No"));
+        }
+        break;
+    case BoolFormat::ONOFF:
+        if (value) {
+            printF(PSTR("On"));
+        } else {
+            printF(PSTR("Off"));
+        }
+        break;
+    }
+}
 void Com::printNumber(uint32_t n) {
     char buf[11]; // Assumes 8-bit chars plus zero byte.
     char* str = &buf[10];
@@ -650,5 +778,77 @@ void Com::printFloat(float number, uint8_t digits) {
         int toPrint = int(remainder);
         print(toPrint);
         remainder -= toPrint;
+    }
+}
+
+void Com::promptStart(PromptDialogCallback cb, FSTRINGPARAM(text), bool blocking) {
+    if (blocking) {
+        Com::printFLN(PSTR("//action:paused"));
+    }
+    if (Printer::promptSupported) {
+        Com::printF(PSTR("//action:prompt_begin "));
+        Com::printFLN(text);
+    }
+    Printer::activePromptDialog = cb;
+}
+
+void Com::promptStart(PromptDialogCallback cb, char* text, bool blocking) {
+    if (blocking) {
+        Com::printFLN(PSTR("//action:paused"));
+    }
+    if (Printer::promptSupported) {
+        Com::printFLN(PSTR("//action:prompt_begin "), text);
+    }
+    Printer::activePromptDialog = cb;
+}
+
+void Com::promptStart(PromptDialogCallback cb, FSTRINGPARAM(prefix), FSTRINGPARAM(text), bool blocking) {
+    if (blocking) {
+        Com::printFLN(PSTR("//action:paused"));
+    }
+    if (Printer::promptSupported) {
+        Com::printF(PSTR("//action:prompt_begin "));
+        Com::printF(prefix);
+        Com::print(' ');
+        Com::printFLN(text);
+    }
+    Printer::activePromptDialog = cb;
+}
+
+void Com::promptStart(PromptDialogCallback cb, FSTRINGPARAM(prefix), char* text, bool blocking) {
+    if (blocking) {
+        Com::printFLN(PSTR("//action:paused"));
+    }
+    if (Printer::promptSupported) {
+        Com::printF(PSTR("//action:prompt_begin "));
+        Com::printF(prefix);
+        Com::print(' ');
+        Com::print(text);
+        Com::println();
+    }
+    Printer::activePromptDialog = cb;
+}
+
+void Com::promptEnd(bool blocking) {
+    writeToAll = true;
+    if (blocking) {
+        Com::printFLN(PSTR("//action:resumed"));
+    }
+    if (Printer::promptSupported) {
+        Com::printFLN(PSTR("//action:prompt_end"));
+    }
+    Printer::activePromptDialog = nullptr;
+}
+
+void Com::promptButton(FSTRINGPARAM(text)) {
+    if (Printer::promptSupported) {
+        Com::printF(PSTR("//action:prompt_button "));
+        Com::printFLN(text);
+    }
+}
+
+void Com::promptShow() {
+    if (Printer::promptSupported) {
+        Com::printFLN(PSTR("//action:prompt_show"));
     }
 }

@@ -20,3 +20,12 @@ src/private
 workspace.xml
 macrotest.cpp
 macrotest.txt
+.idea
+src/SampleSystems/privat
+settings.json
+src/Repetier/.vscode
+src/Repetier/testconfigs
+src/Repetier/Configuration.h
+src/Repetier/Configuration_io.h
+src/Repetier/.pio
+S2SetUp.jpg

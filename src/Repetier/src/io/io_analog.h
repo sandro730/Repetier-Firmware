@@ -30,39 +30,44 @@
 
 #undef IO_ANALOG_INPUT
 
-#if IO_TARGET == 1 // hardware init
+#if IO_TARGET == IO_TARGET_INIT // hardware init
 
 #define IO_ANALOG_INPUT(name, channel, oversample) \
-    analogEnabled[channel] = true;
+    HAL::analogEnable(channel);
 
-#elif IO_TARGET == 4 // class
+#elif IO_TARGET == IO_TARGET_CLASS_DEFINITION // class
 class AnalogInput {
 public:
     virtual int get() = 0;
 };
 
 #define IO_ANALOG_INPUT(name, channel, oversample) \
-    class name##Class: public AnalogInput { \
+    class name##Class : public AnalogInput { \
     public: \
         int32_t count; \
         int32_t sum; \
-        int32_t minVal,maxVal; \
+        int32_t minVal, maxVal; \
         int value; \
-        name##Class():count((1<<oversample)+2),sum(0),minVal(100000),maxVal(0),value(2048) {} \
-        int get() final {return value;} \
+        name##Class() \
+            : count((1 << oversample) + 2) \
+            , sum(0) \
+            , minVal(100000) \
+            , maxVal(0) \
+            , value(2048) {} \
+        int get() final { return value; } \
     }; \
     extern name##Class name;
 
-#elif IO_TARGET == 6 // variable
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // variable
 
 #define IO_ANALOG_INPUT(name, channel, oversample) \
     name##Class name;
 
-#elif IO_TARGET == 11 // analog read loop
+#elif IO_TARGET == IO_TARGET_ANALOG_INPUT_LOOP // analog read loop
 
 #define IO_ANALOG_INPUT(name, channel, oversample) \
     { \
-        int read = ADC->ADC_CDR[channel]; \
+        int read = HAL::analogRead(channel); \
         name.sum += read; \
         if (read < name.minVal) { \
             name.minVal = read; \
@@ -75,7 +80,7 @@ public:
             name.minVal = 100000; \
             name.maxVal = 0; \
             name.sum = 0; \
-            name.count = (1<<oversample)+2;\
+            name.count = (1 << oversample) + 2; \
         } \
     }
 

@@ -22,6 +22,8 @@ Definies the following macros:
 
 IO_OUTPUT(name, pin)
 IO_OUTPUT_INVERTED(name, pin)
+IO_OUTPUT_FAKE(name)
+IO_OUTPUT_LOG(name, output, changeOnly)
 
 */
 
@@ -32,8 +34,10 @@ IO_OUTPUT_INVERTED(name, pin)
 #undef IO_OUTPUT
 #undef IO_OUTPUT_INVERTED
 #undef IO_OUTPUT_FAKE
+#undef IO_OUTPUT_LOG
+#undef IO_STRING
 
-#if IO_TARGET == 1 // Init pins
+#if IO_TARGET == IO_TARGET_INIT // Init pins
 
 #define IO_OUTPUT(name, pin) \
     SET_OUTPUT(pin); \
@@ -43,22 +47,12 @@ IO_OUTPUT_INVERTED(name, pin)
     SET_OUTPUT(pin); \
     WRITE(pin, 1);
 
-#define IO_OUTPUT_FAKE(name)
+#elif IO_TARGET == IO_TARGET_CLASS_DEFINITION // define class
 
-#elif IO_TARGET == 2 // PWM interrupt
-
-#define IO_OUTPUT(name, pin)
-#define IO_OUTPUT_INVERTED(name, pin)
-#define IO_OUTPUT_FAKE(name)
-
-#elif IO_TARGET == 4 // define class
-
-//#define IO_OUTPUT(name, pin) class name {inline static void set(fast8_t val){}};
 #define IO_OUTPUT(name, pin) \
     class name { \
     public: \
-        inline static void set(fast8_t val) \
-        { \
+        inline static void set(fast8_t val) { \
             if (val) { \
                 WRITE(pin, 1); \
             } else { \
@@ -72,8 +66,7 @@ IO_OUTPUT_INVERTED(name, pin)
 #define IO_OUTPUT_INVERTED(name, pin) \
     class name { \
     public: \
-        inline static void set(fast8_t val) \
-        { \
+        inline static void set(fast8_t val) { \
             if (val) { \
                 WRITE(pin, 0); \
             } else { \
@@ -92,12 +85,49 @@ IO_OUTPUT_INVERTED(name, pin)
         inline static void off() { } \
     };
 
-#else
+#define IO_OUTPUT_LOG(name, output, changeOnly) \
+    class name { \
+        static fast8_t state; \
+\
+    public: \
+        inline static void set(fast8_t val) { \
+            if (state != val || !changeOnly) { \
+                Com::printLogF(PSTR(#name)); \
+                Com::printFLN(PSTR("="), static_cast<int>(val)); \
+            } \
+            state = val; \
+            output::set(val); \
+        } \
+        inline static void on() { set(true); } \
+        inline static void off() { set(false); } \
+    };
 
+#define IO_STRING(name, text) \
+    extern PGM_P const PROGMEM name;
+
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES
+
+#define IO_OUTPUT_LOG(name, output, changeOnly) \
+    fast8_t name::state = false;
+
+#define IO_STRING(name, text) \
+    PGM_P const PROGMEM name = text;
+
+#endif
 // Fallback to remove unused macros preventing errors!
 
+#ifndef IO_OUTPUT
 #define IO_OUTPUT(name, pin)
+#endif
+#ifndef IO_OUTPUT_INVERTED
 #define IO_OUTPUT_INVERTED(name, pin)
+#endif
+#ifndef IO_OUTPUT_FAKE
 #define IO_OUTPUT_FAKE(name)
-
+#endif
+#ifndef IO_OUTPUT_LOG
+#define IO_OUTPUT_LOG(name, output, changeOnly)
+#endif
+#ifndef IO_STRING
+#define IO_STRING(name, text)
 #endif

@@ -16,23 +16,57 @@
 
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 const float invBlockFrequency = 1.0 / static_cast<float>(BLOCK_FREQUENCY);
 const float invStepperFrequency = 1.0 / static_cast<float>(STEPPER_FREQUENCY);
 
-#if VELOCITY_PROFILE == 1
+static VelocityProfileLinear volLinear;
+static VelocityProfileCubic volCubic;
+static VelocityProfileQuintic volQuintic;
+VelocityProfile* velocityProfiles[3] = { &volLinear, &volCubic, &volQuintic };
 
-float VelocityProfile::f, VelocityProfile::d1, VelocityProfile::s, VelocityProfile::ds1, VelocityProfile::ds2;
+float VelocityProfile::f, VelocityProfile::s;
 int VelocityProfile::segmentsLeft, VelocityProfile::segments, VelocityProfile::stepsPerSegment;
 
-bool VelocityProfile::start(float vstart, float vend, float time) {
-    float segments = ceil(time * static_cast<float>(BLOCK_FREQUENCY));
-    float h = 1.0 / segments;
-    VelocityProfile::segments = static_cast<int>(segments);
+float VelocityProfile::d1, VelocityProfile::d2, VelocityProfile::d3, VelocityProfile::d4, VelocityProfile::d5;
+float VelocityProfile::dt; // perfect dt for s computation
+float VelocityProfile::ds1, VelocityProfile::ds2, VelocityProfile::ds3, VelocityProfile::ds4, VelocityProfile::ds5, VelocityProfile::ds6;
+
+#if VELOCITY_PROFILE < 0 || VELOCITY_PROFILE > 2
+#error VELOCITY_PROFILE must be 0 = linear, 1 = cubic, 2 = quintic
+#endif
+
+/** like start for constant speed to use faster math */
+bool VelocityProfile::startConstSpeed(float s0, float speed, float time) {
+    float fsegments = ceil(time * static_cast<float>(BLOCK_FREQUENCY));
+    float h = 1.0 / fsegments;
+    segments = static_cast<int>(fsegments);
     stepsPerSegment = static_cast<int>(ceil(time * h * static_cast<float>(STEPPER_FREQUENCY)));
     // tTotal = segments * invStepperFrequency;
-    segmentsLeft = static_cast<int>(segments) - 1;
+    segmentsLeft = segments - 1;
+    f = speed;
+    h *= time;
+    ds1 = h * speed;
+    s = ds1 + s0;
+    return segmentsLeft <= 0;
+}
+/** like next for constant speed to use faster math */
+bool VelocityProfile::nextConstSpeed() {
+    if (segments <= 0) {
+        return true; // invalid, start with next segment
+    }
+    s += ds1;
+    return --segmentsLeft <= 0;
+}
+
+bool VelocityProfileLinear::start(float s0, float vstart, float vend, float time) {
+    float fsegments = ceil(time * static_cast<float>(BLOCK_FREQUENCY));
+    float h = 1.0 / fsegments;
+    segments = static_cast<int>(fsegments);
+    stepsPerSegment = static_cast<int>(ceil(time * h * static_cast<float>(STEPPER_FREQUENCY)));
+    // tTotal = segments * invStepperFrequency;
+    segmentsLeft = segments - 1;
 
     float vdif = vend - vstart;
     ds2 = vdif * h * h;
@@ -40,42 +74,34 @@ bool VelocityProfile::start(float vstart, float vend, float time) {
     f = vstart + 0.5 * d1;
     h *= time;
     ds2 *= time;
-    s = h * vstart + 0.5 * ds2;
-    ds1 = vstart * h + 0.5 * ds2;
+    ds1 = h * vstart + 0.5 * ds2;
+    s = ds1 + s0;
     return segmentsLeft <= 0;
 }
 
-bool VelocityProfile::next() {
+bool VelocityProfileLinear::next() {
     if (segments <= 0) {
-        return false;
+        return true; // invalid, start with next segment
     }
     f += d1;
     s += ds1;
     ds1 += ds2;
     return --segmentsLeft <= 0;
 }
-#endif
 
-#if VELOCITY_PROFILE == 3
-
-float VelocityProfile::f, VelocityProfile::d1, VelocityProfile::d2, VelocityProfile::d3;
-float VelocityProfile::dt; // perfect dt for s compuation
-float VelocityProfile::s, VelocityProfile::ds1, VelocityProfile::ds2, VelocityProfile::ds3, VelocityProfile::ds4;
-int VelocityProfile::segmentsLeft, VelocityProfile::segments, VelocityProfile::stepsPerSegment;
-
-bool VelocityProfile::start(float vstart, float vend, float time) {
+bool VelocityProfileCubic::start(float s0, float vstart, float vend, float time) {
     /*
     Divisions: 1
     Multiplication: 30
     Add/sub: 13
     Total: 41 Operations
     */
-    float segments = ceil(time * static_cast<float>(BLOCK_FREQUENCY));
-    float h = 1.0 / segments;
-    VelocityProfile::segments = static_cast<int>(segments);
+    float fsegments = ceil(time * static_cast<float>(BLOCK_FREQUENCY));
+    float h = 1.0 / fsegments;
+    segments = static_cast<int>(fsegments);
     stepsPerSegment = static_cast<int>(ceil(time * h * static_cast<float>(STEPPER_FREQUENCY)));
     // tTotal = segments * invStepperFrequency;
-    segmentsLeft = static_cast<int>(segments) - 1;
+    segmentsLeft = segments - 1;
     float h2 = h * h;
     float h3 = h2 * h;
     float h4 = h3 * h;
@@ -97,7 +123,7 @@ bool VelocityProfile::start(float vstart, float vend, float time) {
     float c2dt3 = c2 * h3 * time;
     float c3dt4 = c3 * h4 * time;
 
-    s = c3dt4 * 0.25 + c2dt3 * 0.3333333333333 + c0dt;
+    s = c3dt4 * 0.25 + c2dt3 * 0.3333333333333 + c0dt + s0;
     ds1 = 3.75 * c3dt4 + 2.3333333333 * c2dt3 + c0dt;
     ds2 = 12.5 * c3dt4 + 4.0 * c2dt3;
     ds3 = 15 * c3dt4 + 2.0 * c2dt3;
@@ -106,11 +132,11 @@ bool VelocityProfile::start(float vstart, float vend, float time) {
     return segmentsLeft <= 0;
 }
 
-bool VelocityProfile::next() {
+bool VelocityProfileCubic::next() {
     // 7 float additions
 
     if (segments <= 0) {
-        return false;
+        return true; // invalid, start with next segment
     }
     f += d1;
     d1 += d2;
@@ -123,28 +149,20 @@ bool VelocityProfile::next() {
 
     return --segmentsLeft <= 0;
 }
-#endif
 
-#if VELOCITY_PROFILE == 5
-
-float VelocityProfile::f, VelocityProfile::d1, VelocityProfile::d2, VelocityProfile::d3, VelocityProfile::d4, VelocityProfile::d5;
-float VelocityProfile::dt; // perfect dt for s compuation
-float VelocityProfile::s, VelocityProfile::ds1, VelocityProfile::ds2, VelocityProfile::ds3, VelocityProfile::ds4, VelocityProfile::ds5, VelocityProfile::ds6;
-int VelocityProfile::segmentsLeft, VelocityProfile::segments, VelocityProfile::stepsPerSegment;
-
-bool VelocityProfile::start(float vstart, float vend, float time) {
+bool VelocityProfileQuintic::start(float s0, float vstart, float vend, float time) {
     /*
     Divisions: 1
     Multiplication: 46
     Add/sub: 23
     Total: 66 Operations
     */
-    float segments = ceil(time * static_cast<float>(BLOCK_FREQUENCY));
-    float h = 1.0 / segments;
-    VelocityProfile::segments = static_cast<int>(segments);
+    float fsegments = ceil(time * static_cast<float>(BLOCK_FREQUENCY));
+    float h = 1.0 / fsegments;
+    segments = static_cast<int>(fsegments);
     stepsPerSegment = static_cast<int>(ceil(time * h * static_cast<float>(STEPPER_FREQUENCY)));
     // tTotal = segments * invStepperFrequency;
-    segmentsLeft = static_cast<int>(segments) - 1;
+    segmentsLeft = segments - 1;
     float v10 = vend - vstart;
     float h3v10 = h * h * h * v10;
     float h4v10 = h3v10 * h;
@@ -164,7 +182,7 @@ bool VelocityProfile::start(float vstart, float vend, float time) {
     h5v10 *= time;
     h4v10 *= time;
     hv0 *= time;
-    s = h6v10 - 3.0f * h5v10 + 2.5f * h4v10 + hv0;
+    s = h6v10 - 3.0f * h5v10 + 2.5f * h4v10 + hv0 + s0;
     ds1 = 63.0f * h6v10 - 93.0f * h5v10 + 37.5f * h4v10 + hv0;
     ds2 = 602.0f * h6v10 - 540.0f * h5v10 + 125.0f * h4v10;
     ds3 = 2100.0f * h6v10 - 1170.0f * h5v10 + 150.0f * h4v10;
@@ -175,11 +193,11 @@ bool VelocityProfile::start(float vstart, float vend, float time) {
     return segmentsLeft <= 0;
 }
 
-bool VelocityProfile::next() {
+bool VelocityProfileQuintic::next() {
     // 7 float additions
 
     if (segments <= 0) {
-        return false;
+        return true; // invalid, start with next segment
     }
     f += d1;
     d1 += d2;
@@ -196,4 +214,3 @@ bool VelocityProfile::next() {
 
     return --segmentsLeft <= 0;
 }
-#endif

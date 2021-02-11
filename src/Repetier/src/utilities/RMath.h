@@ -62,16 +62,49 @@ public:
     static inline uint32_t sqr(uint32_t a) {
         return a * a;
     }
-#ifdef SUPPORT_64_BIT_MATH
-    static inline int64_t sqr(int64_t a) {
-        return a * a;
-    }
-    static inline uint64_t sqr(uint64_t a) {
-        return a * a;
-    }
-#endif
 
     static inline float sqr(float a) {
         return a * a;
     }
+
+    template <typename T, typename X>
+    static T GCD(T a, X b) {
+        while (b != 0) {
+            T t = a % b;
+            a = b;
+            b = t;
+        }
+        return a;
+    }
+    
+    template <typename T, typename X>
+    constexpr static T LCM(T __m, X __n) {
+        return (__m != 0 && __n != 0) ? (__m / GCD(__m, __n)) * __n : 0;
+    }
+};
+
+class Quadratic1D {
+public:
+    float a, b, c;
+    Quadratic1D(float _a = 0, float _b = 0, float _c = 0)
+        : a(_a)
+        , b(_b)
+        , c(_c) {}
+    inline float y(float x) {
+        return a * x * x + b * x + c;
+    }
+};
+
+/** One dimensional least squre curve 
+  y = a * x^2 + b * x + c
+  based of any number of xy pairs. */
+
+class LeastSquareQuadraticRegression1D {
+    float n, x, x2, x3, x4;
+    float y, xy, x2y;
+
+public:
+    void reset();
+    void add(float px, float py);
+    Quadratic1D getRegression();
 };

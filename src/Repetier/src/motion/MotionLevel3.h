@@ -20,12 +20,13 @@
   This is a segment run at constant velocity. 
 */
 #define NUM_MOTION3_BUFFER 32
+
 class Motion3Buffer { // 28 byte 4 axis 8 bit processor
 public:
     fast8_t id;
     fast8_t parentId;
-    fast8_t directions;
-    fast8_t usedAxes;
+    ufast8_t directions;
+    ufast8_t usedAxes;
     fast8_t last;
     bool checkEndstops;
     int delta[NUM_AXES];
@@ -36,6 +37,8 @@ public:
 };
 
 class Motion3 {
+    friend class Motion2;
+
 public:
     static Motion3Buffer buffers[NUM_MOTION3_BUFFER];
     static volatile fast8_t length; // shared between threads
@@ -43,19 +46,82 @@ public:
     static fast8_t nextActId;       // used only inside interrupt
     static fast8_t skipParentId;    // Skip blocks from this id - endstop was triggered
     static fast8_t lastParentId;
+    static ufast8_t lastDirection; // Last direction for faster switches
     static Motion3Buffer* act;
+    static Motion2Buffer* actM2;
+    static Motion1Buffer* actM1;
     static void init();
     /* Stepper timer called at STEPPER_FREQUENCY
     This is a very small code that is run at the highest interrupt level
     to ensure best accuracy in motion.
     */
     static void timer();
-    /** Return pointe rto next available buffer or nullptr. */
-    static Motion3Buffer* tryReserve();
+    static void setDirectionsForNewMotors();
+    /** Return pointer to next available buffer or nullptr. */
+    static inline Motion3Buffer* tryReserve() {
+        if (length < NUM_MOTION3_BUFFER) {
+            return &buffers[last];
+        }
+        return nullptr;
+    }
     /** Increment head position an dincrement length */
-    static void pushReserved();
-    static void activateNext();
-    static void unstepMotors();
-    // static void removeParentId(uint8_t pid);
+    static inline void pushReserved() {
+        last++;
+        if (last == NUM_MOTION3_BUFFER) {
+            last = 0;
+        }
+        InterruptProtectedBlock noInts;
+        length++;
+    }
+    static bool activateNext(); // select next block, returns true if directions were changed
+    static INLINE void unstepMotors() {
+#ifdef XMOTOR_SWITCHABLE
+        Motion1::motors[X_AXIS]->unstep();
+#else
+        XMotor.unstep();
+#endif
+        YMotor.unstep();
+        ZMotor.unstep();
+        if (Motion1::dittoMode) {
+#if NUM_TOOLS > 6
+            for (fast8_t i = 0; i <= NUM_TOOLS; i++) {
+                Tool::getTool(i)->unstepMotor();
+            }
+#else
+#if NUM_TOOLS > 0
+            Tool::tools[0]->unstepMotor();
+#endif
+#if NUM_TOOLS > 1
+            Tool::tools[1]->unstepMotor();
+#endif
+#if NUM_TOOLS > 2
+            Tool::tools[2]->unstepMotor();
+#endif
+#if NUM_TOOLS > 3
+            Tool::tools[3]->unstepMotor();
+#endif
+#if NUM_TOOLS > 4
+            Tool::tools[4]->unstepMotor();
+#endif
+#if NUM_TOOLS > 5
+            Tool::tools[5]->unstepMotor();
+#endif
+#endif
+        } else {
+            // Tool::getActiveTool()->unstepMotor();
+            if (Motion1::motors[E_AXIS]) {
+                Motion1::motors[E_AXIS]->unstep();
+            }
+        }
+#if NUM_AXES > A_AXIS
+        AMotor.unstep();
+#endif
+#if NUM_AXES > B_AXIS
+        BMotor.unstep();
+#endif
+#if NUM_AXES > C_AXIS
+        CMotor.unstep();
+#endif
+    }
     static void reportBuffers();
 };

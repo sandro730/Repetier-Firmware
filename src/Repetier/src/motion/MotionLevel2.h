@@ -24,13 +24,14 @@ from 0, where 0 position depends on printer type.
 
 #define NUM_MOTION2_BUFFER 4
 class Motion3Buffer;
+class VelocityProfile;
 
-enum Motion2State {
+enum class Motion2State {
     NOT_INITIALIZED = 0,
     ACCELERATE_INIT = 1,
     ACCELERATING = 2,
-    PLATEU_INIT = 3,
-    PLATEU = 4,
+    PLATEAU_INIT = 3,
+    PLATEAU = 4,
     DECCELERATE_INIT = 5,
     DECELERATING = 6,
     FINISHED = 7
@@ -42,7 +43,7 @@ public:
     Motion2State state;
     Motion1Buffer* motion1;
     float t1, t2, t3;
-    float s1, s2, s3, soff;
+    float s1, s2, s3; // , soff;
     // float sScale1,sScale2,sScale3;
     // float sOffset2, sOffset3;
     int32_t stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
@@ -55,11 +56,15 @@ class Motion2 {
     static fast8_t nextActId;
 
 public:
+    static VelocityProfile* velocityProfile;
+    static uint8_t velocityProfileIndex;
     static Motion2Buffer buffers[NUM_MOTION2_BUFFER];
     static volatile fast8_t length;
     static int32_t lastMotorPos[2][NUM_AXES];
     static fast8_t lastMotorIdx; // index to last pos
-
+    static volatile int16_t openBabysteps[NUM_AXES];
+    static const int16_t babystepsPerSegment[NUM_AXES];
+    static int advanceSteps; // already included advance steps
     static void init();
     // Timer gets called at PREPARE_FREQUENCY so it has enough time to
     // prefill data structures required by stepper interrupt. Each segment planned
@@ -71,19 +76,24 @@ public:
     // Gets called when an end stop is triggered during motion.
     // Will stop all motions stored. For z probing and homing We
     // Also note the remainig z steps.
-    static void endstopTriggered(Motion3Buffer* act, fast8_t axis);
-    static void motorEndstopTriggered(fast8_t axis);
+    static void endstopTriggered(Motion3Buffer* act, fast8_t axis, bool dir);
+    static void motorEndstopTriggered(fast8_t axis, bool dir);
 
     /// Called from m3 timer when line is finished as planned
-    static void pop() {
+    static INLINE void pop() {
         InterruptProtectedBlock ip;
         length--;
+        Tool* a = Tool::getActiveTool();
+        if (a != nullptr) {
+            a->moveFinished();
+        }
         Motion1::pop();
     }
     static void reportBuffers();
 
     static void copyMotorPos(int32_t pos[NUM_AXES]);
 
-    /// Assume we are at Motion1::currentPositionTransformed.
+    /// Assume we are at Motion1::currentPositionTransformed and set motor possitions accordingly.
+    /// Use with care or positions might get wrong!
     static void setMotorPositionFromTransformed();
 };

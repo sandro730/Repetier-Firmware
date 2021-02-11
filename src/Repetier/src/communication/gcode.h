@@ -18,21 +18,48 @@
 #ifndef _GCODE_H
 #define _GCODE_H
 
+#include "communication/Communication.h"
+
 #define MAX_CMD_SIZE 96
 #define ARRAY_SIZE(_x) (sizeof(_x) / sizeof(_x[0]))
+#ifndef GCODE_BUFFER_SIZE
+#define GCODE_BUFFER_SIZE 1
+#endif
 
-enum FirmwareState { NotBusy = 0,
-                     Processing,
-                     Paused,
-                     WaitHeater,
-                     DoorOpen };
+#define FATAL_FLAG_POWER 1
+#define FATAL_FLAG_MOTORS 2
+#define FATAL_FLAG_HEATER 4
+#define FATAL_FLAG_SLOW_STOP 8
+
+enum class FirmwareState { NotBusy = 0,
+                           Processing,
+                           Paused,
+                           WaitHeater,
+                           DoorOpen };
 
 class SDCard;
 class Commands;
+class GCode;
+
+#ifndef SERIAL_IN_BUFFER
+#ifdef SERIAL_BUFFER_SIZE
+#define SERIAL_IN_BUFFER SERIAL_BUFFER_SIZE
+#else
+#define SERIAL_IN_BUFFER 128
+#endif
+#endif
 
 class SerialGCodeSource : public GCodeSource {
     Stream* stream;
-
+#if EMERGENCY_PARSER
+    uint8_t buffer[SERIAL_IN_BUFFER];
+    uint8_t commandReceiving[MAX_CMD_SIZE]; ///< Current received command.
+    uint8_t commandsReceivingWritePosition; ///< Writing position in gcode_transbuffer.
+    uint8_t sendAsBinary;                   ///< Flags the command as binary input.
+    uint8_t commentDetected;                ///< Flags true if we are reading the comment part of a command.
+    uint8_t binaryCommandSize;              ///< Expected size of the incoming binary command.
+    ufast8_t bufWritePos, bufReadPos, bufLength, bufLengthRead;
+#endif
 public:
     SerialGCodeSource(Stream* p);
     virtual bool isOpen();
@@ -42,7 +69,10 @@ public:
     virtual int readByte();
     virtual void writeByte(uint8_t byte);
     virtual void close();
+    virtual void prefetchContent();
+    bool testEmergency(GCode& gcode); // Returns true when gcode was handled
 };
+
 //#pragma message "Sd support: " XSTR(SDSUPPORT)
 #if SDSUPPORT
 class SDCardGCodeSource : public GCodeSource {
@@ -78,7 +108,6 @@ public:
     void executeCommands(FSTRINGPARAM(data), bool waitFinish, int action);
 };
 
-#if NEW_COMMUNICATION
 extern FlashGCodeSource flashSource;
 extern SerialGCodeSource serial0Source;
 #if BLUETOOTH_SERIAL > 0
@@ -87,9 +116,8 @@ extern SerialGCodeSource serial1Source;
 #if SDSUPPORT
 extern SDCardGCodeSource sdSource;
 #endif
-#endif
 
-class GCode // 52 uint8_ts per command needed
+class GCode // 97-99 uint8_ts per command needed
 {
     uint16_t params;
     uint16_t params2;
@@ -116,6 +144,9 @@ public:
     float K;    ///< G-code K value if set
     float L;    ///< G-code L value if set
     float O;    ///< G-code O value if set
+    float U;    ///< G-code U value if set
+    float V;    ///< G-code V value if set
+    float W;    ///< G-code W value if set
 
     char* text; ///< Text message of g-code if present.
     //moved the byte to the end and aligned ints on short boundary
@@ -125,17 +156,35 @@ public:
     // True if origin did not come from serial console. That way we can send status messages to
     // a host only if he would normally not know about the mode switch.
     bool internalCommand;
+
+    GCode();
     inline bool hasM() {
         return ((params & 2) != 0);
+    }
+    inline void setM(uint16_t val) {
+        M = val;
+        params |= 2;
     }
     inline bool hasN() {
         return ((params & 1) != 0);
     }
+    inline void setN(uint16_t val) {
+        N = val;
+        params |= 1;
+    }
     inline bool hasG() {
         return ((params & 4) != 0);
     }
+    inline void setG(uint16_t val) {
+        G = val;
+        params |= 4;
+    }
     inline bool hasX() {
         return ((params & 8) != 0);
+    }
+    inline void setX(float val) {
+        X = val;
+        params |= 8;
     }
     inline void unsetX() {
         params &= ~8;
@@ -143,11 +192,19 @@ public:
     inline bool hasY() {
         return ((params & 16) != 0);
     }
+    inline void setY(float val) {
+        Y = val;
+        params |= 16;
+    }
     inline void unsetY() {
         params &= ~16;
     }
     inline bool hasZ() {
         return ((params & 32) != 0);
+    }
+    inline void setZ(float val) {
+        Z = val;
+        params |= 32;
     }
     inline void unsetZ() {
         params &= ~32;
@@ -158,17 +215,37 @@ public:
     inline bool hasE() {
         return ((params & 64) != 0);
     }
+    inline void setE(float val) {
+        E = val;
+        params |= 64;
+    }
     inline bool hasF() {
         return ((params & 256) != 0);
+    }
+    inline void setF(float val) {
+        F = val;
+        params |= 256;
     }
     inline bool hasT() {
         return ((params & 512) != 0);
     }
+    inline void setT(uint8_t val) {
+        T = val;
+        params |= 512;
+    }
     inline bool hasS() {
         return ((params & 1024) != 0);
     }
+    inline void setS(int32_t val) {
+        S = val;
+        params |= 8;
+    }
     inline bool hasP() {
         return ((params & 2048) != 0);
+    }
+    inline void setP(int32_t val) {
+        P = val;
+        params |= 2048;
     }
     inline bool isV2() {
         return ((params & 4096) != 0);
@@ -179,35 +256,123 @@ public:
     inline bool hasI() {
         return ((params2 & 1) != 0);
     }
+    inline void setI(float val) {
+        I = val;
+        params |= 4096;
+        params2 |= 8;
+    }
     inline bool hasJ() {
         return ((params2 & 2) != 0);
+    }
+    inline void setJ(float val) {
+        J = val;
+        params |= 4096;
+        params2 |= 2;
     }
     inline bool hasR() {
         return ((params2 & 4) != 0);
     }
+    inline void setR(float val) {
+        R = val;
+        params |= 4096;
+        params2 |= 4;
+    }
     inline bool hasD() {
         return ((params2 & 8) != 0);
+    }
+    inline void setD(float val) {
+        D = val;
+        params |= 4096;
+        params2 |= 8;
     }
     inline bool hasC() {
         return ((params2 & 16) != 0);
     }
+    inline void unsetC() {
+        params2 &= ~16;
+    }
+    inline void setC(float val) {
+        C = val;
+        params |= 4096;
+        params2 |= 16;
+    }
     inline bool hasH() {
         return ((params2 & 32) != 0);
+    }
+    inline void setH(float val) {
+        H = val;
+        params |= 4096;
+        params2 |= 32;
     }
     inline bool hasA() {
         return ((params2 & 64) != 0);
     }
+    inline void unsetA() {
+        params2 &= ~64;
+    }
+    inline void setA(float val) {
+        A = val;
+        params |= 4096;
+        params2 |= 64;
+    }
     inline bool hasB() {
         return ((params2 & 128) != 0);
+    }
+    inline void unsetB() {
+        params2 &= ~128;
+    }
+    inline void setB(float val) {
+        B = val;
+        params |= 4096;
+        params2 |= 128;
     }
     inline bool hasK() {
         return ((params2 & 256) != 0);
     }
+    inline void setK(float val) {
+        K = val;
+        params |= 4096;
+        params2 |= 256;
+    }
     inline bool hasL() {
         return ((params2 & 512) != 0);
     }
+    inline void setL(float val) {
+        L = val;
+        params |= 4096;
+        params2 |= 512;
+    }
     inline bool hasO() {
         return ((params2 & 1024) != 0);
+    }
+    inline void setO(float val) {
+        O = val;
+        params |= 4096;
+        params2 |= 1024;
+    }
+    inline bool hasU() {
+        return ((params2 & 2048) != 0);
+    }
+    inline void setU(float val) {
+        U = val;
+        params |= 4096;
+        params2 |= 2048;
+    }
+    inline bool hasV() {
+        return ((params2 & 4096) != 0);
+    }
+    inline void setV(float val) {
+        V = val;
+        params |= 4096;
+        params2 |= 4096;
+    }
+    inline bool hasW() {
+        return ((params2 & 8192) != 0);
+    }
+    inline void setW(float val) {
+        W = val;
+        params |= 4096;
+        params2 |= 8192;
     }
     inline long getS(long def) {
         return (hasS() ? S : def);
@@ -221,11 +386,23 @@ public:
     inline bool hasFormatError() {
         return ((params2 & 32768) != 0);
     }
+    inline void reset() { params = params2 = 0; }
+    inline bool isPriorityM() {
+#if HOST_PRIORITY_CONTROLS
+        return (M >= 10000 && M < 19999);
+#else
+        return false;
+#endif
+    }
+    inline uint16_t getPriorityM() {
+        return (isPriorityM() ? (M - 10000) : M);
+    }
     void printCommand();
-    bool parseBinary(uint8_t* buffer, bool fromSerial);
+    bool parseBinary(uint8_t* buffer, fast8_t length, bool fromSerial);
     bool parseAscii(char* line, bool fromSerial);
     void popCurrentCommand();
     void echoCommand();
+    void ackOutOfOrder();
     /** Get next command in command buffer. After the command is processed, call gcode_command_finished() */
     static GCode* peekCurrentCommand();
     /** Frees the cache used by the last command fetched. */
@@ -233,16 +410,15 @@ public:
     static void pushCommand();
     static void executeFString(FSTRINGPARAM(cmd));
     static uint8_t computeBinarySize(char* ptr);
-    static void fatalError(FSTRINGPARAM(message));
+    static void fatalError(FSTRINGPARAM(message), uint8_t flags = 255);
     static void reportFatalError();
     static void resetFatalError();
     inline static bool hasFatalError() {
-        return fatalErrorMsg != NULL;
+        return fatalErrorMsg != nullptr;
     }
     static void keepAlive(enum FirmwareState state, int id = 0);
     static uint32_t keepAliveInterval;
     friend class SDCard;
-    friend class UIDisplay;
     static FSTRINGPARAM(fatalErrorMsg);
     friend class GCodeSource;
 
@@ -282,19 +458,12 @@ protected:
     static volatile uint8_t bufferLength;             ///< Number of commands stored in gcode_buffer
     static uint8_t formatErrors;                      ///< Number of sequential format errors
     static millis_t lastBusySignal;                   ///< When was the last busy signal
-#if NEW_COMMUNICATION == 0
-    static int8_t waitingForResend;                ///< Waiting for line to be resend. -1 = no wait.
-    static uint32_t lastLineNumber;                ///< Last line number received.
-    static millis_t timeOfLastDataPacket;          ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
-    static uint8_t wasLastCommandReceivedAsBinary; ///< Was the last successful command in binary mode?
-#else
 public:
     GCodeSource* source;
-#endif
 };
 
-#if JSON_OUTPUT
-#include "../sdcard/SdFat.h"
+#if JSON_OUTPUT && SDSUPPORT
+#include "SdFat/src/SdFat.h"
 // Struct to hold Gcode file information 32 bytes
 #define GENBY_SIZE 16
 class GCodeFileInfo {
